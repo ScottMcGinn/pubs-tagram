@@ -1,3 +1,5 @@
+import { Timestamp } from 'firebase/firestore';
+
 // User types
 export interface User {
   userId: string;
@@ -5,6 +7,18 @@ export interface User {
   displayName?: string;
   createdAt: Date;
   lastLogin: Date;
+}
+
+// User Profile types (Phase 1: User Profiles)
+export interface UserProfile {
+  uid: string;
+  email: string;
+  displayName: string;
+  bio: string;
+  profilePictureUrl?: string;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+  isPublic: boolean;
 }
 
 // Pub Entry types
