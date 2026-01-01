@@ -64,4 +64,6 @@ export type RootStackParamList = {
   Feed: undefined;
   AddPub: undefined;
   PubDetail: { pub: Pub };
+  ProfileScreen: undefined;
+  UserProfile: { userId: string };
 };

@@ -11,6 +11,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { UserProfile } from '../../types';
+import { Timestamp } from 'firebase/firestore';
 
 interface ProfileEditFormProps {
   profile: UserProfile;
@@ -35,7 +36,7 @@ export const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
       await onSave({
         displayName,
         bio,
-        updatedAt: new Date(),
+        updatedAt: Timestamp.now(),
       });
     } finally {
       setIsSaving(false);

@@ -271,7 +271,7 @@ const FeedScreen = () => {
       <View style={styles.buttonContainer}>
         <TouchableOpacity 
           style={styles.profileButton} 
-          onPress={() => navigation.navigate('ProfileScreen')}
+          onPress={() => (navigation as any).navigate('ProfileScreen')}
         >
           <Text style={styles.profileButtonText}>My Profile</Text>
         </TouchableOpacity>

@@ -45,55 +45,6 @@ const AddPubScreen = () => {
   const [loading, setLoading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
-  useEffect(() => {
-    if (Platform.OS === 'web' && dropZoneRef.current) {
-      const dropZone = dropZoneRef.current;
-
-      const handleDragEnter = (e: DragEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsDragging(true);
-      };
-
-      const handleDragOver = (e: DragEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsDragging(true);
-      };
-
-      const handleDragLeave = (e: DragEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsDragging(false);
-      };
-
-      const handleDrop = (e: DragEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsDragging(false);
-
-        if (loading) return;
-
-        const files = e.dataTransfer?.files;
-        if (files && files.length > 0) {
-          handleFilesAdded(files);
-        }
-      };
-
-      dropZone.addEventListener('dragenter', handleDragEnter);
-      dropZone.addEventListener('dragover', handleDragOver);
-      dropZone.addEventListener('dragleave', handleDragLeave);
-      dropZone.addEventListener('drop', handleDrop);
-
-      return () => {
-        dropZone.removeEventListener('dragenter', handleDragEnter);
-        dropZone.removeEventListener('dragover', handleDragOver);
-        dropZone.removeEventListener('dragleave', handleDragLeave);
-        dropZone.removeEventListener('drop', handleDrop);
-      };
-    }
-  }, [loading, photos]);
-
   const handleFilesAdded = (files: FileList | File[]) => {
     const fileArray = Array.from(files);
     const imageFiles = fileArray.filter(file => file.type.startsWith('image/'));
