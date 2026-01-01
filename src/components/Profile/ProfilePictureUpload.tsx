@@ -47,13 +47,11 @@ export const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.8,
-        base64: true,
       });
 
-      if (!result.canceled && result.assets[0].base64) {
-        const base64Uri = `data:image/jpeg;base64,${result.assets[0].base64}`;
+      if (!result.canceled && result.assets[0].uri) {
         setIsUploading(true);
-        await onUpload(base64Uri);
+        await onUpload(result.assets[0].uri);
       }
     } catch (error) {
       Alert.alert('Error', 'Failed to capture photo');
@@ -75,13 +73,11 @@ export const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.8,
-        base64: true,
       });
 
-      if (!result.canceled && result.assets[0].base64) {
-        const base64Uri = `data:image/jpeg;base64,${result.assets[0].base64}`;
+      if (!result.canceled && result.assets[0].uri) {
         setIsUploading(true);
-        await onUpload(base64Uri);
+        await onUpload(result.assets[0].uri);
       }
     } catch (error) {
       Alert.alert('Error', 'Failed to select photo');

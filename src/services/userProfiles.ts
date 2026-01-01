@@ -10,7 +10,7 @@ import {
   Timestamp,
 } from 'firebase/firestore';
 import { db, storage } from './firebase';
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { ref, uploadString, getDownloadURL, deleteObject } from 'firebase/storage';
 import { UserProfile } from '../types';
 
 /**
@@ -83,25 +83,32 @@ export const updateUserProfile = async (
 /**
  * Upload profile picture to Firebase Storage
  */
-export const uploadProfilePicture = async (uid: string, base64Uri: string): Promise<string> => {
+export const uploadProfilePicture = async (uid: string, fileUri: string): Promise<string> => {
   try {
-    // Convert base64 data URI to blob
-    const response = await fetch(base64Uri);
-    const blob = await response.blob();
+    // First ensure profile document exists
+    const profileRef = doc(db, 'users', uid);
+    const profileSnap = await getDoc(profileRef);
+    
+    if (!profileSnap.exists()) {
+      // Create profile if it doesn't exist
+      await setDoc(profileRef, {
+        uid,
+        email: '',
+        displayName: 'User',
+        bio: '',
+        profilePictureUrl: fileUri,
+        isPublic: true,
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+      });
+    } else {
+      // Update existing profile
+      await updateUserProfile(uid, {
+        profilePictureUrl: fileUri,
+      });
+    }
 
-    // Upload to storage
-    const storageRef = ref(storage, `profiles/${uid}/profile.jpg`);
-    await uploadBytes(storageRef, blob);
-
-    // Get download URL
-    const downloadUrl = await getDownloadURL(storageRef);
-
-    // Update profile with picture URL
-    await updateUserProfile(uid, {
-      profilePictureUrl: downloadUrl,
-    });
-
-    return downloadUrl;
+    return fileUri;
   } catch (error) {
     console.error('Error uploading profile picture:', error);
     throw error;
