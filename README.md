@@ -2,11 +2,15 @@
 
 An Instagram-style mobile app for tracking pubs you've visited, built with React Native and Firebase.
 
+[![Unit Tests](https://github.com/ScottMcGinn/pubs-tagram/actions/workflows/test.yml/badge.svg)](https://github.com/ScottMcGinn/pubs-tagram/actions/workflows/test.yml)
+[![Lint & Type Check](https://github.com/ScottMcGinn/pubs-tagram/actions/workflows/lint.yml/badge.svg)](https://github.com/ScottMcGinn/pubs-tagram/actions/workflows/lint.yml)
+
 ## Project Structure
 
 ```
 pubs-tagram/
 ├── src/
+│   ├── __tests__/       # Unit tests
 │   ├── components/      # Reusable UI components
 │   ├── screens/         # Screen components
 │   ├── navigation/      # Navigation configuration
@@ -14,6 +18,8 @@ pubs-tagram/
 │   ├── contexts/        # React contexts (Auth, etc.)
 │   ├── types/           # TypeScript type definitions
 │   └── utils/           # Utility functions
+├── .github/
+│   └── workflows/       # GitHub Actions CI/CD
 ├── assets/              # Images, fonts, etc.
 ├── App.tsx              # Root component
 └── package.json         # Dependencies
@@ -123,6 +129,40 @@ Then:
 - TypeScript
 - Firebase (Auth, Firestore, Storage)
 - React Navigation
+- Jest (Unit Testing)
+
+## CI/CD Pipeline
+
+This project uses **GitHub Actions** to automatically run tests and lint checks on every push and pull request.
+
+### Workflows
+
+- **Unit Tests** (`.github/workflows/test.yml`)
+  - Runs on Node.js 18.x and 20.x
+  - Executes `npm test` with coverage
+  - Uploads coverage reports to Codecov
+  - Triggered on pushes to `main` and `develop` branches
+
+- **Lint & Type Check** (`.github/workflows/lint.yml`)
+  - TypeScript type checking
+  - ESLint validation
+  - Ensures code quality standards
+  - Triggered on pushes and PRs
+
+### Running Tests Locally
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage report
+npm run test:coverage
+```
+
+See [TESTING.md](TESTING.md) for detailed testing documentation.
 - Expo Image Picker
 
 ## License
