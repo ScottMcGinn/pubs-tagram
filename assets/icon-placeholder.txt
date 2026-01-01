@@ -1,0 +1,2 @@
+# Placeholder for icon.png
+# This is a temporary file. Replace with actual 1024x1024 app icon later.

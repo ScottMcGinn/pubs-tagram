@@ -1,0 +1,168 @@
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  Alert,
+  ActivityIndicator,
+  SafeAreaView,
+} from 'react-native';
+import { useAuth } from '../contexts/AuthContext';
+
+const AuthScreen = () => {
+  const { signIn, signUp } = useAuth();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleAuth = async () => {
+    if (!email || !password) {
+      Alert.alert('Error', 'Please enter email and password');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      if (isSignUp) {
+        await signUp(email, password);
+      } else {
+        await signIn(email, password);
+      }
+    } catch (error: any) {
+      Alert.alert('Error', error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <View style={styles.content}>
+          <Text style={styles.icon}>🍺</Text>
+          <Text style={styles.title}>Pubs-tagram</Text>
+          <Text style={styles.subtitle}>Track Your Perfect Pints</Text>
+
+          <View style={styles.form}>
+            <TextInput
+              style={styles.input}
+              placeholder="Email"
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              keyboardType="email-address"
+              editable={!loading}
+            />
+
+            <TextInput
+              style={styles.input}
+              placeholder="Password"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              editable={!loading}
+            />
+
+            <TouchableOpacity
+              style={styles.button}
+              onPress={handleAuth}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color="#FFFFFF" />
+              ) : (
+                <Text style={styles.buttonText}>
+                  {isSignUp ? 'Sign Up' : 'Sign In'}
+                </Text>
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => setIsSignUp(!isSignUp)}
+              disabled={loading}
+            >
+              <Text style={styles.switchText}>
+                {isSignUp
+                  ? 'Already have an account? Sign In'
+                  : "Don't have an account? Sign Up"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
+};
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  container: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  content: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  icon: {
+    fontSize: 64,
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#262626',
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#8E8E8E',
+    marginBottom: 40,
+  },
+  form: {
+    width: '100%',
+    maxWidth: 400,
+  },
+  input: {
+    backgroundColor: '#FAFAFA',
+    borderWidth: 1,
+    borderColor: '#DBDBDB',
+    borderRadius: 8,
+    padding: 15,
+    fontSize: 16,
+    marginBottom: 12,
+  },
+  button: {
+    backgroundColor: '#0095F6',
+    borderRadius: 8,
+    padding: 15,
+    alignItems: 'center',
+    marginTop: 8,
+    marginBottom: 16,
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  switchText: {
+    color: '#0095F6',
+    fontSize: 14,
+    textAlign: 'center',
+  },
+});
+
+export default AuthScreen;

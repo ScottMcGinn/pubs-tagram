@@ -1,0 +1,38 @@
+{
+  "expo": {
+    "name": "Pubs-tagram",
+    "slug": "pubs-tagram",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.pubstagram.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.pubstagram.app",
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Pubs-tagram to access your photos to add pub pictures.",
+          "cameraPermission": "Allow Pubs-tagram to use your camera to take pub pictures."
+        }
+      ]
+    ],
+    "sdkVersion": "54.0.0"
+  }
+}
