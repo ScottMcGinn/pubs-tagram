@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { UserProfile } from '../types';
 import { getCurrentUserProfile, updateUserProfile, uploadProfilePicture, deleteProfilePicture } from '../services/userProfiles';
 import { useAuth } from './AuthContext';
@@ -26,15 +26,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [otherUserProfile, setOtherUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-
-  // Load current user profile on auth state change
-  useEffect(() => {
-    if (user?.uid) {
-      loadCurrentUserProfile();
-    } else {
-      setCurrentUserProfile(null);
-    }
-  }, [user?.uid]);
 
   const loadCurrentUserProfile = async () => {
     if (!user?.uid) return;

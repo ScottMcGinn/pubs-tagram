@@ -268,9 +268,17 @@ const FeedScreen = () => {
         </View>
       )}
 
-      <TouchableOpacity style={styles.signOutButton} onPress={signOut}>
-        <Text style={styles.signOutText}>Sign Out</Text>
-      </TouchableOpacity>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity 
+          style={styles.profileButton} 
+          onPress={() => navigation.navigate('ProfileScreen')}
+        >
+          <Text style={styles.profileButtonText}>My Profile</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.signOutButton} onPress={signOut}>
+          <Text style={styles.signOutText}>Sign Out</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 };
@@ -490,15 +498,33 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginBottom: 20,
+  },
+  profileButton: {
+    padding: 12,
+    backgroundColor: '#007AFF',
+    borderRadius: 8,
+    alignItems: 'center',
+    flex: 1,
+  },
+  profileButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
   signOutButton: {
-    margin: 16,
     padding: 12,
     borderWidth: 1,
     borderColor: '#DBDBDB',
     borderRadius: 8,
     alignItems: 'center',
-    width: '100%',
-    maxWidth: 400,
+    flex: 1,
   },
   signOutText: {
     color: '#262626',

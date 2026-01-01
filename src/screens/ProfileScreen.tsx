@@ -14,6 +14,7 @@ import { createUserProfile } from '../services/userProfiles';
 import { ProfileHeader } from '../components/Profile/ProfileHeader';
 import { ProfilePictureUpload } from '../components/Profile/ProfilePictureUpload';
 import { ProfileEditForm } from '../components/Profile/ProfileEditForm';
+import { UserProfile } from '../types';
 
 type ProfileScreenMode = 'view' | 'edit';
 
@@ -23,30 +24,39 @@ export const ProfileScreen: React.FC = () => {
   const [mode, setMode] = useState<ProfileScreenMode>('view');
   const [isInitializing, setIsInitializing] = useState(true);
 
-  // Initialize profile on mount
+  // Initialize profile on mount - load profile when user navigates here
   useEffect(() => {
-    const initializeProfile = async () => {
-      if (!user?.uid) return;
-
+    const loadProfile = async () => {
+      if (!user?.uid) {
+        console.log('No user UID');
+        return;
+      }
+      
+      setIsInitializing(true);
       try {
-        setIsInitializing(true);
-        
-        // Check if profile exists, if not create one
-        if (!currentUserProfile) {
-          const displayName = user.displayName || user.email?.split('@')[0] || 'User';
-          await createUserProfile(user.uid, displayName, user.email || '');
-          await loadCurrentUserProfile();
-        }
+        console.log('Attempting to load profile for user:', user.uid);
+        await loadCurrentUserProfile();
+        console.log('Profile loaded successfully');
       } catch (err) {
-        console.error('Error initializing profile:', err);
-        Alert.alert('Error', 'Failed to initialize profile');
+        // Profile might not exist yet, create it
+        console.log('Profile load failed, attempting to create:', err);
+        try {
+          const displayName = user.displayName || user.email?.split('@')[0] || 'User';
+          console.log('Creating profile with name:', displayName);
+          await createUserProfile(user.uid, displayName, user.email || '');
+          console.log('Profile created, attempting to load again');
+          await loadCurrentUserProfile();
+          console.log('Profile loaded after creation');
+        } catch (createErr) {
+          console.error('Error creating or loading profile:', createErr);
+        }
       } finally {
         setIsInitializing(false);
       }
     };
-
-    initializeProfile();
-  }, [user?.uid]);
+    
+    loadProfile();
+  }, []);
 
   if (isInitializing || loading) {
     return (
@@ -58,6 +68,18 @@ export const ProfileScreen: React.FC = () => {
     );
   }
 
+  // If no profile exists, show empty profile with edit button to create it
+  const displayProfile = currentUserProfile || {
+    uid: user?.uid || '',
+    email: user?.email || '',
+    displayName: user?.displayName || user?.email?.split('@')[0] || 'User',
+    bio: '',
+    profilePictureUrl: undefined,
+    isPublic: true,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
@@ -65,7 +87,7 @@ export const ProfileScreen: React.FC = () => {
         {mode === 'view' && (
           <>
             <ProfileHeader
-              profile={currentUserProfile}
+              profile={displayProfile}
               editingMode={false}
             />
 
@@ -113,18 +135,18 @@ export const ProfileScreen: React.FC = () => {
         {/* Edit Mode */}
         {mode === 'edit' && (
           <>
-            <ProfileHeader profile={currentUserProfile} editingMode={true} />
+            <ProfileHeader profile={displayProfile} editingMode={true} />
 
             <View style={styles.editContent}>
               <ProfilePictureUpload
-                currentImageUrl={currentUserProfile?.profilePictureUrl}
+                currentImageUrl={displayProfile?.profilePictureUrl}
                 onUpload={uploadPicture}
                 onDelete={deletePicture}
                 loading={loading}
               />
 
               <ProfileEditForm
-                profile={currentUserProfile!}
+                profile={displayProfile as UserProfile}
                 onSave={updateProfile}
                 loading={loading}
                 error={error}

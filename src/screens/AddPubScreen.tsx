@@ -32,8 +32,7 @@ interface PhotoData {
 const AddPubScreen = () => {
   const navigation = useNavigation<AddPubScreenNavigationProp>();
   const { user } = useAuth();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const dropZoneRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<any>(null);
 
   const [pubName, setPubName] = useState('');
   const [location, setLocation] = useState('');
@@ -117,7 +116,7 @@ const AddPubScreen = () => {
     }
   };
 
-  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileInputChange = (e: any) => {
     if (e.target.files && e.target.files.length > 0) {
       handleFilesAdded(e.target.files);
     }
@@ -236,62 +235,31 @@ const AddPubScreen = () => {
         <View style={styles.section}>
           <Text style={styles.label}>Photos (1-5 required) *</Text>
           
-          {Platform.OS === 'web' && (
-            <input
-              ref={fileInputRef as any}
-              type="file"
-              accept="image/*"
-              multiple
-              style={{ display: 'none' }}
-              onChange={handleFileInputChange as any}
-            />
-          )}
-
-          <div
-            ref={dropZoneRef as any}
-            style={{
-              minHeight: 112,
-              borderRadius: 8,
-              border: isDragging ? '2px dashed #0095F6' : '2px dashed transparent',
-              backgroundColor: isDragging ? '#F0F8FF' : 'transparent',
-              padding: 8,
-              transition: 'all 0.2s',
-            }}
-          >
-            <View style={styles.photoGrid}>
-              {photos.map((photo, index) => (
-                <View key={index} style={styles.photoContainer}>
-                  <Image source={{ uri: photo.uri }} style={styles.photo} />
-                  <TouchableOpacity
-                    style={styles.removeButton}
-                    onPress={() => handleRemovePhoto(index)}
-                    disabled={loading}
-                  >
-                    <Text style={styles.removeButtonText}>✕</Text>
-                  </TouchableOpacity>
-                </View>
-              ))}
-
-              {photos.length < 5 && (
+          <View style={styles.photoGrid}>
+            {photos.map((photo, index) => (
+              <View key={index} style={styles.photoContainer}>
+                <Image source={{ uri: photo.uri }} style={styles.photo} />
                 <TouchableOpacity
-                  style={[styles.addPhotoButton, isDragging && styles.addPhotoButtonDragging]}
-                  onPress={handlePickImage}
+                  style={styles.removeButton}
+                  onPress={() => handleRemovePhoto(index)}
                   disabled={loading}
                 >
-                  <Text style={styles.addPhotoText}>+</Text>
-                  <Text style={styles.addPhotoHint}>
-                    {Platform.OS === 'web' ? 'Click or drag images' : 'Tap to add'}
-                  </Text>
+                  <Text style={styles.removeButtonText}>✕</Text>
                 </TouchableOpacity>
-              )}
-            </View>
-
-            {isDragging && (
-              <View style={styles.dragOverlay}>
-                <Text style={styles.dragOverlayText}>📷 Drop images here</Text>
               </View>
+            ))}
+
+            {photos.length < 5 && (
+              <TouchableOpacity
+                style={styles.addPhotoButton}
+                onPress={handlePickImage}
+                disabled={loading}
+              >
+                <Text style={styles.addPhotoText}>+</Text>
+                <Text style={styles.addPhotoHint}>Tap to add</Text>
+              </TouchableOpacity>
             )}
-          </div>
+          </View>
         </View>
 
         <View style={styles.section}>
