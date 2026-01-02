@@ -1,0 +1,65 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is authenticated
+    function isAuth() {
+      return request.auth.uid != null;
+    }
+    
+    // Helper function to check if user owns the document
+    function isOwner(userId) {
+      return isAuth() && request.auth.uid == userId;
+    }
+    
+    // ===== USERS COLLECTION =====
+    match /users/{userId} {
+      // Anyone can read public user profiles
+      // Private profiles only readable by themselves
+      allow read: if isAuth() && (
+        resource.data.isPublic == true || 
+        isOwner(userId)
+      );
+      
+      // Users can only create/update/delete their own profile
+      allow create, update, delete: if isOwner(userId);
+    }
+    
+    // ===== PUBS COLLECTION =====
+    match /pubs/{pubId} {
+      // Authenticated users can read all pubs
+      allow read: if isAuth();
+      
+      // Only pub creator can create/update/delete
+      allow create: if isAuth();
+      allow update, delete: if isAuth() && resource.data.userId == request.auth.uid;
+      
+      // ===== LIKES SUBCOLLECTION =====
+      match /likes/{userId} {
+        // Authenticated users can read all likes
+        allow read: if isAuth();
+        
+        // Users can only like/unlike their own likes
+        allow create, update, delete: if isOwner(userId);
+      }
+      
+      // ===== DISLIKES SUBCOLLECTION =====
+      match /dislikes/{userId} {
+        // Authenticated users can read all dislikes
+        allow read: if isAuth();
+        
+        // Users can only dislike their own dislikes
+        allow create, update, delete: if isOwner(userId);
+      }
+    }
+    
+    // ===== FOLLOWS COLLECTION =====
+    match /follows/{followId} {
+      // Authenticated users can read follow relationships
+      allow read: if isAuth();
+      
+      // Users can only create/update/delete their own follow actions
+      allow create, update, delete: if isAuth() && request.auth.uid == request.resource.data.follower;
+    }
+  }
+}

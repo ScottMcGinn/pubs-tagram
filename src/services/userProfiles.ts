@@ -139,23 +139,40 @@ export const deleteProfilePicture = async (uid: string): Promise<void> => {
 
 /**
  * Search users by display name
+ * 
+ * @param searchTerm - The search term to filter by displayName
+ * @param limit - Maximum number of results to return
+ * @param blockedUserIds - Optional array of user IDs to exclude from results (for future blocking feature)
+ * @param excludePrivate - Optional flag to exclude private profiles (for future privacy feature)
  */
-export const searchUsers = async (searchTerm: string, limit: number = 20): Promise<UserProfile[]> => {
+export const searchUsers = async (
+  searchTerm: string,
+  limit: number = 20,
+  blockedUserIds: string[] = [],
+  excludePrivate: boolean = false
+): Promise<UserProfile[]> => {
   try {
-    // Simple search - in production, use Algolia or similar
+    // Fetch all users (no privacy filter since all authenticated users can see all profiles)
+    // Note: In production with large user bases, consider using Algolia or similar
     const q = query(
-      collection(db, 'users'),
-      where('isPublic', '==', true)
+      collection(db, 'users')
     );
 
     const snapshot = await getDocs(q);
     const users = snapshot.docs.map(doc => doc.data() as UserProfile);
 
-    // Client-side filtering
+    // Client-side filtering with support for future features
     return users
-      .filter(user =>
-        user.displayName.toLowerCase().includes(searchTerm.toLowerCase())
-      )
+      .filter(user => {
+        // Exclude blocked users
+        if (blockedUserIds.includes(user.uid)) return false;
+        
+        // Exclude private profiles if requested (future feature)
+        if (excludePrivate && user.isPublic === false) return false;
+        
+        // Match search term
+        return user.displayName.toLowerCase().includes(searchTerm.toLowerCase());
+      })
       .slice(0, limit);
   } catch (error) {
     console.error('Error searching users:', error);
@@ -178,19 +195,38 @@ export const userProfileExists = async (uid: string): Promise<boolean> => {
 };
 
 /**
- * Get all public profiles (for discovery) - paginated
+ * Get all discoverable profiles (for discovery) - paginated
+ * 
+ * @param limit - Maximum number of profiles to return
+ * @param blockedUserIds - Optional array of user IDs to exclude from results (for future blocking feature)
+ * @param excludePrivate - Optional flag to exclude private profiles (for future privacy feature)
  */
-export const getPublicProfiles = async (limit: number = 20): Promise<UserProfile[]> => {
+export const getPublicProfiles = async (
+  limit: number = 20,
+  blockedUserIds: string[] = [],
+  excludePrivate: boolean = false
+): Promise<UserProfile[]> => {
   try {
+    // Fetch all users (no privacy filter since all authenticated users can see all profiles)
     const q = query(
-      collection(db, 'users'),
-      where('isPublic', '==', true)
+      collection(db, 'users')
     );
 
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => doc.data() as UserProfile).slice(0, limit);
+    return snapshot.docs
+      .map(doc => doc.data() as UserProfile)
+      .filter(user => {
+        // Exclude blocked users
+        if (blockedUserIds.includes(user.uid)) return false;
+        
+        // Exclude private profiles if requested (future feature)
+        if (excludePrivate && user.isPublic === false) return false;
+        
+        return true;
+      })
+      .slice(0, limit);
   } catch (error) {
-    console.error('Error getting public profiles:', error);
+    console.error('Error getting discoverable profiles:', error);
     throw error;
   }
 };

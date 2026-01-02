@@ -58,22 +58,22 @@ npm install
 
 ### Step 3: Configure Firebase Security Rules
 
-**Firestore Rules:**
-```javascript
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /users/{userId} {
-      allow read, write: if request.auth.uid == userId;
-    }
-    
-    match /pubs/{pubId} {
-      allow read, write: if request.auth.uid == resource.data.userId;
-      allow create: if request.auth.uid == request.resource.data.userId;
-    }
-  }
-}
-```
+**Firestore Rules (Production):**
+
+The app uses production-ready security rules. See [firestore.rules](firestore.rules) for the complete ruleset.
+
+Key rules:
+- Users can read all authenticated user profiles
+- Users can only modify their own profile
+- All authenticated users can read pubs
+- Only pub creators can modify/delete their pubs
+- Users can only like/dislike/follow as themselves
+
+To deploy:
+1. Copy `firestore.rules` content
+2. Go to Firebase Console → Firestore → Rules
+3. Replace with production rules
+4. Click Publish
 
 **Storage Rules:**
 ```javascript
@@ -81,11 +81,18 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
     match /users/{userId}/pubs/{allPaths=**} {
-      allow read, write: if request.auth.uid == userId;
+      allow read: if request.auth.uid != null;
+      allow write: if request.auth.uid == userId;
+    }
+    match /profiles/{userId}/profile.jpg {
+      allow read: if request.auth.uid != null;
+      allow write: if request.auth.uid == userId;
     }
   }
 }
 ```
+
+See [FIRESTORE_RULES_DEPLOYMENT.md](FIRESTORE_RULES_DEPLOYMENT.md) for detailed deployment instructions.
 
 ### Step 4: Run the App
 
@@ -101,27 +108,36 @@ Then:
 ## Development Roadmap
 
 - [x] Phase 0: Project Setup
-- [ ] Phase 1: Authentication
-- [ ] Phase 2: Add Pub Entry
-- [ ] Phase 3: Feed Display
-- [ ] Phase 4: Pub Detail View
-- [ ] Phase 5: Delete Functionality
-- [ ] Phase 6: Polish & Testing
-- [ ] Phase 7: Deployment
+- [x] Phase 1: Authentication
+- [x] Phase 2: Add Pub Entry
+- [x] Phase 3: Feed & Explore Display
+- [x] Phase 4: Pub Detail View
+- [x] Phase 5: Social Features (Follow, Like/Dislike)
+- [x] Phase 6: User Profiles & Search
+- [x] Phase 7: Production Security Rules
+- [ ] Phase 8: Advanced Features & Polish
+- [ ] Phase 9: Performance Optimization
+- [ ] Phase 10: Deployment
 
-## Features (MVP)
+## Features (Current)
 
+### Core Features ✅
 - Sign up / Sign in with email/password
-- Add pub entries with:
-  - Pub name
-  - Location
-  - What you had (optional)
-  - Value for money (1-5 beer glass rating)
-  - 1-5 photos
-- View pubs in Instagram-style feed
-- Swipe through photos
-- View pub details
-- Delete pub entries
+- Add pub entries with photos, ratings, and details
+- View pubs in Instagram-style feed and explore grid
+- Swipe through photos on detail view
+- Like/dislike pubs with 👍 and 👎 buttons
+- Follow/unfollow users
+- View user profiles with follower counts
+- Search users by display name
+- Responsive design (mobile & tablet)
+
+### Coming Soon 🚀
+- Private profiles / blocking users
+- In-app messaging
+- Advanced search filters
+- Push notifications
+- Analytics dashboard
 
 ## Tech Stack
 
@@ -162,8 +178,22 @@ npm run test:watch
 npm run test:coverage
 ```
 
+**Current Test Status:**
+- 40/40 tests passing ✅
+- TypeScript: 0 errors ✅
+- Coverage: 55% firestore.ts, 7.82% overall
+
 See [TESTING.md](TESTING.md) for detailed testing documentation.
-- Expo Image Picker
+
+## Documentation
+
+- [ARCHITECTURE.md](ARCHITECTURE.md) - Technical architecture and data models
+- [FIRESTORE_RULES_DEPLOYMENT.md](FIRESTORE_RULES_DEPLOYMENT.md) - How to deploy security rules
+- [FIRESTORE_RULES_DETAILED.md](FIRESTORE_RULES_DETAILED.md) - Detailed security rules documentation
+- [FIRESTORE_RULES_QUICK_REFERENCE.md](FIRESTORE_RULES_QUICK_REFERENCE.md) - Quick reference for security rules
+- [PRODUCTION_READINESS.md](PRODUCTION_READINESS.md) - Production deployment checklist
+- [PRODUCT_ROADMAP.md](PRODUCT_ROADMAP.md) - Feature roadmap and sprint planning
+- [TESTING.md](TESTING.md) - Testing strategy and coverage
 
 ## License
 
