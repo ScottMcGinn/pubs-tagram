@@ -8,22 +8,43 @@ import {
   Alert,
   SafeAreaView,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { useFocusEffect } from '@react-navigation/native';
 import { useUser } from '../contexts/UserContext';
 import { useAuth } from '../contexts/AuthContext';
-import { createUserProfile } from '../services/userProfiles';
+import { createUserProfile, getFollowersCount, getFollowingCount } from '../services/userProfiles';
 import { ProfileHeader } from '../components/Profile/ProfileHeader';
 import { ProfilePictureUpload } from '../components/Profile/ProfilePictureUpload';
 import { ProfileEditForm } from '../components/Profile/ProfileEditForm';
 import { UserProfile } from '../types';
 import { Timestamp } from 'firebase/firestore';
+import { RootStackParamList } from '../types';
+
+type ProfileScreenNavigationProp = StackNavigationProp<RootStackParamList, 'ProfileScreen'>;
 
 type ProfileScreenMode = 'view' | 'edit';
 
 export const ProfileScreen: React.FC = () => {
+  const navigation = useNavigation<ProfileScreenNavigationProp>();
   const { user } = useAuth();
   const { currentUserProfile, loading, error, updateProfile, uploadPicture, deletePicture, loadCurrentUserProfile } = useUser();
   const [mode, setMode] = useState<ProfileScreenMode>('view');
   const [isInitializing, setIsInitializing] = useState(true);
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+
+  const loadFollowCounts = async () => {
+    if (!user?.uid) return;
+    try {
+      const followers = await getFollowersCount(user.uid);
+      const following = await getFollowingCount(user.uid);
+      setFollowersCount(followers);
+      setFollowingCount(following);
+    } catch (error) {
+      console.error('Error loading follow counts:', error);
+    }
+  };
 
   // Initialize profile on mount - load profile when user navigates here
   useEffect(() => {
@@ -38,6 +59,8 @@ export const ProfileScreen: React.FC = () => {
         console.log('Attempting to load profile for user:', user.uid);
         await loadCurrentUserProfile();
         console.log('Profile loaded successfully');
+        // Load follower/following counts
+        await loadFollowCounts();
       } catch (err) {
         // Profile might not exist yet, create it
         console.log('Profile load failed, attempting to create:', err);
@@ -48,6 +71,8 @@ export const ProfileScreen: React.FC = () => {
           console.log('Profile created, attempting to load again');
           await loadCurrentUserProfile();
           console.log('Profile loaded after creation');
+          // Load follower/following counts
+          await loadFollowCounts();
         } catch (createErr) {
           console.error('Error creating or loading profile:', createErr);
         }
@@ -58,6 +83,25 @@ export const ProfileScreen: React.FC = () => {
     
     loadProfile();
   }, []);
+
+  // Refresh counts when screen comes into focus (after following someone)
+  useFocusEffect(
+    React.useCallback(() => {
+      loadFollowCounts();
+    }, [user?.uid])
+  );
+
+  const handleFollowersPress = () => {
+    if (user?.uid) {
+      navigation.navigate('FollowersList', { userId: user.uid });
+    }
+  };
+
+  const handleFollowingPress = () => {
+    if (user?.uid) {
+      navigation.navigate('FollowingList', { userId: user.uid });
+    }
+  };
 
   if (isInitializing || loading) {
     return (
@@ -90,6 +134,10 @@ export const ProfileScreen: React.FC = () => {
             <ProfileHeader
               profile={displayProfile}
               editingMode={false}
+              followersCount={followersCount}
+              followingCount={followingCount}
+              onFollowersPress={handleFollowersPress}
+              onFollowingPress={handleFollowingPress}
             />
 
             {error && (

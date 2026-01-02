@@ -11,13 +11,12 @@
 
 ## Next Steps for You
 
-### 1. Install Node.js and Expo CLI
-If you don't have them:
-- Download Node.js: https://nodejs.org/ (LTS version)
-- After Node is installed, open Command Prompt and run:
-  ```
-  npm install -g expo-cli
-  ```
+### 1. Install Node.js
+If you don't have it:
+- Download Node.js: https://nodejs.org/ (LTS version recommended)
+- Verify installation by running in PowerShell: `node --version`
+
+**Note on Expo CLI:** Expo deprecated the global `expo-cli` for Node 17+. We use `npx expo` instead (included with Node), which is more reliable.
 
 ### 2. Install Project Dependencies
 Open Command Prompt, navigate to the project folder:
@@ -60,16 +59,19 @@ This will take a few minutes to download all dependencies.
    - Start in test mode > Next > Done
 
 ### 4. Run the App
-In Command Prompt (still in project folder):
+In PowerShell (in the project folder):
 ```
-npm start
+npx expo start --clear
 ```
 
-This will open Expo DevTools in your browser.
+This will:
+- Clear the Metro bundler cache
+- Display a QR code in the terminal
 
 **To test on phone:**
-- Install "Expo Go" app on your iPhone or Android
-- Scan the QR code shown in terminal/browser
+- Install "Expo Go" app (iOS or Android)
+- Open the camera app (iOS) or Expo Go app (Android) to scan the QR code
+- **Network requirement:** Phone and computer must be on the same WiFi network
 
 **To test on computer:**
 - Press `i` for iOS Simulator (Mac only)
@@ -99,17 +101,48 @@ Once you confirm everything is running, we'll build:
 
 ## Troubleshooting
 
+### "expo is not recognized"
+**Cause:** The global `expo-cli` may have been removed by system cleanup, Windows Update, or antivirus tools.  
+**Fix:** Use `npx` instead, which doesn't require global installation:
+```powershell
+npx expo start --clear
+```
+This runs Expo from your project's dependencies.
+
+### Phone won't connect to QR code (blue spinner forever)
+**Cause:** Network connectivity issue between phone and computer.  
+**Fixes (try in order):**
+1. Verify both devices are on the **same WiFi network** (not mobile hotspot)
+2. Disable Windows Firewall temporarily to test:
+   - Settings > Privacy & Security > Windows Defender Firewall > Turn off (toggle for Private and Public networks)
+3. In the terminal, press `i` to switch to LAN connection mode
+4. If still failing, press `s` and select a different connection method
+
+### Dependencies out of sync
+**Cause:** npm packages may have been partially cleared or corrupted.  
+**Fix:** Reinstall everything:
+```powershell
+npm install
+```
+
+### App crashes or errors when running
+**Fix:** Clear cache and rebuild:
+```powershell
+npx expo start --clear
+```
+Then press `r` in the terminal to reload the app.
+
+### "legacy expo-cli does not support Node +17"
+**Cause:** You're using the deprecated global `expo-cli` with a newer Node version.  
+**Fix:** Use `npx expo` instead of the global `expo` command.
+
 **If npm install fails:**
 - Make sure you have Node.js installed
-- Try running Command Prompt as Administrator
+- Try running PowerShell as Administrator
 
 **If Firebase isn't working:**
 - Make sure you placed the config file in the right location
 - Check that all Firebase services are enabled in console
-
-**If app won't start:**
-- Make sure no other apps are using port 19000
-- Try `npm start -- --clear` to clear cache
 
 ## Ready?
 

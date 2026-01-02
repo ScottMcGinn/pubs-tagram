@@ -15,7 +15,7 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList, Pub } from '../types';
 import { useAuth } from '../contexts/AuthContext';
-import { getUserPubs } from '../services/firestore';
+import { getUserPubs, likePub, unlikePub, hasLikedPub, getLikeCount, dislikePub, undislikePub, hasDislikedPub, getDislikeCount } from '../services/firestore';
 
 type FeedScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -32,6 +32,10 @@ const FeedScreen = () => {
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>('feed');
   const [cardPhotoIndices, setCardPhotoIndices] = useState<{ [key: string]: number }>({});
+  const [likedPubs, setLikedPubs] = useState<{ [key: string]: boolean }>({});
+  const [likeCounts, setLikeCounts] = useState<{ [key: string]: number }>({});
+  const [dislikedPubs, setDislikedPubs] = useState<{ [key: string]: boolean }>({});
+  const [dislikeCounts, setDislikeCounts] = useState<{ [key: string]: number }>({});
 
   const isDesktop = width >= 768;
   const maxWidth = isDesktop ? 1000 : width;
@@ -43,10 +47,99 @@ const FeedScreen = () => {
       setLoading(true);
       const userPubs = await getUserPubs(user.uid);
       setPubs(userPubs);
+
+      // Load like and dislike counts and status for each pub
+      const newLikeCounts: { [key: string]: number } = {};
+      const newLikedPubs: { [key: string]: boolean } = {};
+      const newDislikeCounts: { [key: string]: number } = {};
+      const newDislikedPubs: { [key: string]: boolean } = {};
+      
+      for (const pub of userPubs) {
+        const likeCount = await getLikeCount(pub.pubId);
+        const hasLiked = await hasLikedPub(user.uid, pub.pubId);
+        const dislikeCount = await getDislikeCount(pub.pubId);
+        const hasDisliked = await hasDislikedPub(user.uid, pub.pubId);
+        
+        newLikeCounts[pub.pubId] = likeCount;
+        newLikedPubs[pub.pubId] = hasLiked;
+        newDislikeCounts[pub.pubId] = dislikeCount;
+        newDislikedPubs[pub.pubId] = hasDisliked;
+      }
+      
+      setLikeCounts(newLikeCounts);
+      setLikedPubs(newLikedPubs);
+      setDislikeCounts(newDislikeCounts);
+      setDislikedPubs(newDislikedPubs);
     } catch (error) {
       console.error('Error loading pubs:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleToggleLike = async (pubId: string, userId: string) => {
+    if (!userId || !pubId) {
+      console.error('Invalid userId or pubId:', { userId, pubId });
+      return;
+    }
+
+    try {
+      const currentlyLiked = likedPubs[pubId] || false;
+      
+      if (currentlyLiked) {
+        // Unlike
+        console.log('Unliking pub:', pubId);
+        await unlikePub(userId, pubId);
+        setLikedPubs(prev => ({ ...prev, [pubId]: false }));
+        setLikeCounts(prev => ({ ...prev, [pubId]: Math.max(0, (prev[pubId] || 1) - 1) }));
+      } else {
+        // Like
+        console.log('Liking pub:', pubId);
+        await likePub(userId, pubId);
+        setLikedPubs(prev => ({ ...prev, [pubId]: true }));
+        setLikeCounts(prev => ({ ...prev, [pubId]: (prev[pubId] || 0) + 1 }));
+        // Remove dislike if it was disliked
+        if (dislikedPubs[pubId]) {
+          await undislikePub(userId, pubId);
+          setDislikedPubs(prev => ({ ...prev, [pubId]: false }));
+          setDislikeCounts(prev => ({ ...prev, [pubId]: Math.max(0, (prev[pubId] || 1) - 1) }));
+        }
+      }
+    } catch (error) {
+      console.error('Error toggling like:', error);
+    }
+  };
+
+  const handleToggleDislike = async (pubId: string, userId: string) => {
+    if (!userId || !pubId) {
+      console.error('Invalid userId or pubId:', { userId, pubId });
+      return;
+    }
+
+    try {
+      const currentlyDisliked = dislikedPubs[pubId] || false;
+      
+      if (currentlyDisliked) {
+        // Remove dislike
+        console.log('Removing dislike from pub:', pubId);
+        await undislikePub(userId, pubId);
+        setDislikedPubs(prev => ({ ...prev, [pubId]: false }));
+        setDislikeCounts(prev => ({ ...prev, [pubId]: Math.max(0, (prev[pubId] || 1) - 1) }));
+      } else {
+        // Dislike
+        console.log('Disliking pub:', pubId);
+        await dislikePub(userId, pubId);
+        setDislikedPubs(prev => ({ ...prev, [pubId]: true }));
+        setDislikeCounts(prev => ({ ...prev, [pubId]: (prev[pubId] || 0) + 1 }));
+        // Remove like if it was liked
+        if (likedPubs[pubId]) {
+          await unlikePub(userId, pubId);
+          setLikedPubs(prev => ({ ...prev, [pubId]: false }));
+          setLikeCounts(prev => ({ ...prev, [pubId]: Math.max(0, (prev[pubId] || 1) - 1) }));
+        }
+      }
+    } catch (error) {
+      console.error('Error toggling dislike:', error);
     }
   };
 
@@ -96,8 +189,25 @@ const FeedScreen = () => {
         activeOpacity={0.9}
       >
         <View style={styles.cardHeader}>
-          <Text style={styles.pubName}>{item.pubName}</Text>
-          <Text style={styles.location}>{item.location}</Text>
+          <View style={styles.headerContent}>
+            <View style={styles.headerTextContainer}>
+              {item.userProfile?.displayName && (
+                <Text style={styles.displayName}>{item.userProfile.displayName}</Text>
+              )}
+              <Text style={styles.pubName}>{item.pubName}</Text>
+              <Text style={styles.location}>{item.location}</Text>
+            </View>
+            {item.userProfile?.profilePictureUrl ? (
+              <Image
+                source={{ uri: item.userProfile.profilePictureUrl }}
+                style={styles.profilePicture}
+              />
+            ) : (
+              <View style={[styles.profilePicture, styles.profilePictureEmpty]}>
+                <Text style={styles.profilePictureText}>👤</Text>
+              </View>
+            )}
+          </View>
         </View>
         
         <View style={styles.photoContainer}>
@@ -183,6 +293,31 @@ const FeedScreen = () => {
           </View>
         )}
       </View>
+
+      <View style={styles.likesContainer}>
+        <TouchableOpacity
+          style={styles.likeButton}
+          onPress={() => {
+            if (user?.uid) {
+              handleToggleLike(item.pubId, user.uid);
+            }
+          }}
+        >
+          <Text style={styles.thumbIcon}>👍</Text>
+          <Text style={styles.likeCount}>{likeCounts[item.pubId] || 0}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.dislikeButton}
+          onPress={() => {
+            if (user?.uid) {
+              handleToggleDislike(item.pubId, user.uid);
+            }
+          }}
+        >
+          <Text style={styles.thumbIcon}>👎</Text>
+          <Text style={styles.likeCount}>{dislikeCounts[item.pubId] || 0}</Text>
+        </TouchableOpacity>
+      </View>
       </TouchableOpacity>
     );
   };
@@ -227,26 +362,6 @@ const FeedScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Pubs-tagram</Text>
-        <View style={styles.headerButtons}>
-          <TouchableOpacity
-            style={styles.viewToggle}
-            onPress={() => setViewMode(viewMode === 'feed' ? 'grid' : 'feed')}
-          >
-            <Text style={styles.viewToggleText}>
-              {viewMode === 'feed' ? '⊞' : '☰'}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.addButton}
-            onPress={() => navigation.navigate('AddPub')}
-          >
-            <Text style={styles.addButtonText}>+</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
       {pubs.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyText}>No pubs yet!</Text>
@@ -308,6 +423,17 @@ const styles = StyleSheet.create({
   headerButtons: {
     flexDirection: 'row',
     gap: 12,
+  },
+  searchButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#F0F0F0',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  searchButtonText: {
+    fontSize: 18,
   },
   viewToggle: {
     width: 40,
@@ -378,6 +504,34 @@ const styles = StyleSheet.create({
   },
   cardHeader: {
     padding: 12,
+  },
+  headerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  headerTextContainer: {
+    flex: 1,
+  },
+  displayName: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#262626',
+    marginBottom: 2,
+  },
+  profilePicture: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#DBDBDB',
+    marginLeft: 12,
+  },
+  profilePictureEmpty: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  profilePictureText: {
+    fontSize: 24,
   },
   pubName: {
     fontSize: 18,
@@ -529,6 +683,32 @@ const styles = StyleSheet.create({
   signOutText: {
     color: '#262626',
     fontSize: 16,
+  },
+  likesContainer: {
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#EFEFEF',
+    flexDirection: 'row',
+    gap: 16,
+  },
+  likeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  dislikeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  thumbIcon: {
+    fontSize: 20,
+  },
+  likeCount: {
+    fontSize: 16,
+    color: '#262626',
+    fontWeight: '500',
   },
 });
 

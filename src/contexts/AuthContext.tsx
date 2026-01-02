@@ -7,12 +7,13 @@ import {
   User,
 } from 'firebase/auth';
 import { auth } from '../services/firebase';
+import { createUserProfile } from '../services/userProfiles';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string, displayName: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -85,9 +86,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (email: string, password: string, displayName: string) => {
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      // Create user profile after successful sign up with chosen display name
+      await createUserProfile(userCredential.user.uid, displayName, email);
     } catch (error) {
       throw error;
     }

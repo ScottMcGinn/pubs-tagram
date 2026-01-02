@@ -19,6 +19,8 @@ export interface UserProfile {
   createdAt: Timestamp;
   updatedAt: Timestamp;
   isPublic: boolean;
+  followers?: string[]; // Array of user IDs who follow this user
+  following?: string[]; // Array of user IDs this user follows
 }
 
 // Pub Entry types
@@ -36,6 +38,12 @@ export interface Pub {
   thumbnailUrls: string[];
   createdAt: Date;
   updatedAt: Date;
+  likeCount?: number;
+  // User info for displaying on card
+  userProfile?: {
+    displayName: string;
+    profilePictureUrl?: string;
+  };
 }
 
 // Form data for creating a new pub
@@ -66,4 +74,9 @@ export type RootStackParamList = {
   PubDetail: { pub: Pub };
   ProfileScreen: undefined;
   UserProfile: { userId: string };
+  Search: undefined;
+  Discover: undefined;
+  FollowersList: { userId: string };
+  FollowingList: { userId: string };
+  Explore: undefined;
 };

@@ -17,6 +17,7 @@ const AuthScreen = () => {
   const { signIn, signUp } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -26,10 +27,15 @@ const AuthScreen = () => {
       return;
     }
 
+    if (isSignUp && !displayName) {
+      Alert.alert('Error', 'Please enter a username');
+      return;
+    }
+
     setLoading(true);
     try {
       if (isSignUp) {
-        await signUp(email, password);
+        await signUp(email, password, displayName);
       } else {
         await signIn(email, password);
       }
@@ -61,6 +67,17 @@ const AuthScreen = () => {
               keyboardType="email-address"
               editable={!loading}
             />
+
+            {isSignUp && (
+              <TextInput
+                style={styles.input}
+                placeholder="Username"
+                value={displayName}
+                onChangeText={setDisplayName}
+                autoCapitalize="none"
+                editable={!loading}
+              />
+            )}
 
             <TextInput
               style={styles.input}

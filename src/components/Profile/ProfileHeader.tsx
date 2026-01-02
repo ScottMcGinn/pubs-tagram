@@ -1,17 +1,25 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Image, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { UserProfile } from '../../types';
 
 interface ProfileHeaderProps {
   profile: UserProfile | null;
   loading?: boolean;
   editingMode?: boolean;
+  followersCount?: number;
+  followingCount?: number;
+  onFollowersPress?: () => void;
+  onFollowingPress?: () => void;
 }
 
 export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   profile,
   loading = false,
   editingMode = false,
+  followersCount = 0,
+  followingCount = 0,
+  onFollowersPress,
+  onFollowingPress,
 }) => {
   if (loading) {
     return (
@@ -50,6 +58,27 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       {/* Name and Email */}
       <Text style={styles.displayName}>{profile.displayName}</Text>
       <Text style={styles.email}>{profile.email}</Text>
+
+      {/* Followers/Following Stats */}
+      <View style={styles.statsContainer}>
+        <TouchableOpacity 
+          style={styles.statItem}
+          onPress={onFollowersPress}
+          disabled={!onFollowersPress}
+        >
+          <Text style={styles.statNumber}>{followersCount}</Text>
+          <Text style={styles.statLabel}>Followers</Text>
+        </TouchableOpacity>
+        <View style={styles.statDivider} />
+        <TouchableOpacity 
+          style={styles.statItem}
+          onPress={onFollowingPress}
+          disabled={!onFollowingPress}
+        >
+          <Text style={styles.statNumber}>{followingCount}</Text>
+          <Text style={styles.statLabel}>Following</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Bio */}
       {profile.bio ? (
@@ -93,7 +122,32 @@ const styles = StyleSheet.create({
   email: {
     fontSize: 14,
     color: '#666',
-    marginBottom: 12,
+    marginBottom: 16,
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    marginBottom: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  statItem: {
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  statNumber: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#262626',
+  },
+  statLabel: {
+    fontSize: 12,
+    color: '#8E8E8E',
+    marginTop: 4,
+  },
+  statDivider: {
+    width: 1,
+    height: 30,
+    backgroundColor: '#DBDBDB',
   },
   bio: {
     fontSize: 14,
