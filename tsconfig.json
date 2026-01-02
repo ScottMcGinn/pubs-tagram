@@ -3,15 +3,16 @@
   "compilerOptions": {
     "strict": true,
     "jsx": "react-native",
-    "module": "Node16",
+    "module": "esnext",
     "target": "esnext",
-    "moduleResolution": "node16",
+    "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "baseUrl": ".",
+    "noImplicitAny": false,
     "paths": {
       "@/*": [
         "src/*"

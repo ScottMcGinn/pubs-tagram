@@ -104,7 +104,7 @@ export const SearchScreen: React.FC = () => {
         <View style={styles.userInfo}>
           <Text style={styles.displayName}>{item.displayName}</Text>
           <Text style={styles.followersCount}>
-            {item.followersCount || 0} followers
+            {(item as any).followersCount || 0} followers
           </Text>
           {item.bio && <Text style={styles.bio} numberOfLines={1}>{item.bio}</Text>}
         </View>

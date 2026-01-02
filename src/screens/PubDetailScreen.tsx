@@ -11,7 +11,7 @@ import {
   Modal,
   ActivityIndicator,
 } from 'react-native';
-import { useRoute, useNavigation, RouteProp, useFocusEffect } from '@react-navigation/native';
+import { useRoute, useNavigation, useFocusEffect, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
 import { deletePub, likePub, unlikePub, hasLikedPub, getLikeCount, dislikePub, undislikePub, hasDislikedPub, getDislikeCount } from '../services/firestore';
@@ -143,7 +143,7 @@ const PubDetailScreen = () => {
       console.log('Starting delete for pub:', pub.pubId);
       
       // Delete photos from Storage
-      const deletePhotoPromises = pub.photoUrls.map(async (url) => {
+      const deletePhotoPromises = pub.photoUrls.map(async (url: string) => {
         try {
           const urlObj = new URL(url);
           const path = decodeURIComponent(urlObj.pathname.split('/o/')[1].split('?')[0]);
@@ -155,7 +155,7 @@ const PubDetailScreen = () => {
         }
       });
 
-      const deleteThumbnailPromises = pub.thumbnailUrls.map(async (url) => {
+      const deleteThumbnailPromises = pub.thumbnailUrls.map(async (url: string) => {
         try {
           const urlObj = new URL(url);
           const path = decodeURIComponent(urlObj.pathname.split('/o/')[1].split('?')[0]);
@@ -347,7 +347,7 @@ const PubDetailScreen = () => {
         {/* Photo Indicator Dots */}
         {pub.photoUrls.length > 1 && (
           <View style={styles.dotsContainer}>
-            {pub.photoUrls.map((_, index) => (
+            {pub.photoUrls.map((_: string, index: number) => (
               <TouchableOpacity
                 key={index}
                 onPress={() => setCurrentPhotoIndex(index)}

@@ -23,7 +23,7 @@ const Tab = createBottomTabNavigator();
 function AppTabs() {
   return (
     <Tab.Navigator
-      screenOptions={({ navigation }) => ({
+      screenOptions={({ navigation }: any) => ({
         headerShown: true,
         tabBarActiveTintColor: '#007AFF',
         tabBarInactiveTintColor: '#999',
@@ -37,10 +37,10 @@ function AppTabs() {
       <Tab.Screen
         name="FeedTab"
         component={FeedScreen}
-        options={({ navigation }) => ({
+        options={({ navigation }: any) => ({
           title: 'Pubs-tagram',
           tabBarLabel: 'Feed',
-          tabBarIcon: ({ color }) => <Text style={{ fontSize: 20, color }}>⊞</Text>,
+          tabBarIcon: ({ color }: any) => <Text style={{ fontSize: 20, color }}>⊞</Text>,
           headerRight: () => (
             <View style={{ flexDirection: 'row', marginRight: 16, gap: 12, alignItems: 'center' }}>
               <TouchableOpacity onPress={() => navigation.navigate('Search')}>
@@ -68,7 +68,7 @@ function AppTabs() {
           title: 'Discover',
           headerShown: true,
           tabBarLabel: 'Discover',
-          tabBarIcon: ({ color }) => <Text style={{ fontSize: 20, color }}>⭐</Text>,
+          tabBarIcon: ({ color }: any) => <Text style={{ fontSize: 20, color }}>⭐</Text>,
         }}
       />
       <Tab.Screen
@@ -78,7 +78,7 @@ function AppTabs() {
           title: 'Explore',
           headerShown: true,
           tabBarLabel: 'Explore',
-          tabBarIcon: ({ color }) => <Text style={{ fontSize: 20, color }}>🔍</Text>,
+          tabBarIcon: ({ color }: any) => <Text style={{ fontSize: 20, color }}>🔍</Text>,
         }}
       />
       <Tab.Screen
@@ -87,7 +87,7 @@ function AppTabs() {
         options={{
           title: 'Profile',
           tabBarLabel: 'Profile',
-          tabBarIcon: ({ color }) => <Text style={{ fontSize: 20, color }}>👤</Text>,
+          tabBarIcon: ({ color }: any) => <Text style={{ fontSize: 20, color }}>👤</Text>,
         }}
       />
     </Tab.Navigator>
@@ -100,7 +100,9 @@ function AuthStack() {
       <Stack.Screen 
         name="Auth" 
         component={AuthScreen}
-        options={{ animationEnabled: false }}
+        options={({ navigation }: any) => ({
+          headerShown: false,
+        })}
       />
     </Stack.Navigator>
   );
