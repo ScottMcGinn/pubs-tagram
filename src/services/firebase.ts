@@ -1,8 +1,7 @@
 import { initializeApp } from 'firebase/app';
-import { initializeAuth, getReactNativePersistence, getAuth } from 'firebase/auth';
+import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -25,18 +24,13 @@ try {
   app = initializeApp(firebaseConfig);
   console.log('[Firebase] initializeApp successful');
   
-  // Try to initialize auth with persistence
+  // Initialize auth - Firebase 10+ handles persistence automatically on React Native
   try {
-    console.log('[Firebase] Initializing auth with AsyncStorage...');
-    auth = initializeAuth(app, {
-      persistence: getReactNativePersistence(AsyncStorage)
-    });
-    console.log('[Firebase] Auth initialized with AsyncStorage');
-  } catch (authError: any) {
-    console.warn('[Firebase] AsyncStorage auth failed:', authError?.message);
-    console.log('[Firebase] Falling back to getAuth...');
+    console.log('[Firebase] Initializing auth...');
     auth = getAuth(app);
-    console.log('[Firebase] Auth initialized with getAuth');
+    console.log('[Firebase] Auth initialized');
+  } catch (authError: any) {
+    console.error('[Firebase] Auth init failed:', authError?.message);
   }
 } catch (error: any) {
   console.error('[Firebase] CRITICAL:', error?.message || JSON.stringify(error));

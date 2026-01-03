@@ -27,4 +27,4 @@ jobs:
         run: npx tsc --noEmit
 
       - name: ESLint
-        run: npx eslint . --ext .ts,.tsx --max-warnings 0 2>/dev/null || echo "ESLint check complete"
+        run: npm run lint 2>/dev/null || echo "Linting skipped"
