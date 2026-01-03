@@ -6,6 +6,17 @@ import AppNavigator from './src/navigation/AppNavigator';
 import { StatusBar } from 'expo-status-bar';
 import { View, Text, ScrollView } from 'react-native';
 
+// Catch errors at module import time
+console.log('[App] App.tsx module loading');
+
+try {
+  console.log('[App] Importing services...');
+  require('./src/services/firebase');
+  console.log('[App] Firebase service imported');
+} catch (error: any) {
+  console.error('[App] FAILED to import Firebase:', error?.message);
+}
+
 class ErrorBoundary extends React.Component<any, { hasError: boolean; error: Error | null; errorInfo: string }> {
   constructor(props: any) {
     super(props);
@@ -17,8 +28,8 @@ class ErrorBoundary extends React.Component<any, { hasError: boolean; error: Err
   }
 
   componentDidCatch(error: Error, errorInfo: any) {
-    console.error('App Error:', error);
-    console.error('Error Info:', errorInfo);
+    console.error('[ErrorBoundary] Caught error:', error);
+    console.error('[ErrorBoundary] Error Info:', errorInfo);
     this.setState({ errorInfo: errorInfo.componentStack || '' });
   }
 
@@ -49,7 +60,7 @@ class ErrorBoundary extends React.Component<any, { hasError: boolean; error: Err
 }
 
 export default function App() {
-  console.log('App.tsx: Rendering App component');
+  console.log('[App] App component rendering');
   
   return (
     <ErrorBoundary>

@@ -14,39 +14,39 @@ const firebaseConfig = {
   appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID || "1:905466838608:web:ddf687816379658d93db55"
 };
 
-console.log('Initializing Firebase with config:', {
-  apiKey: firebaseConfig.apiKey ? 'SET' : 'MISSING',
-  authDomain: firebaseConfig.authDomain,
-  projectId: firebaseConfig.projectId
-});
+console.log('[Firebase] Module loading - projectId:', firebaseConfig.projectId);
 
-// Initialize Firebase
-let app;
-let auth;
+// Initialize Firebase synchronously
+let app: any;
+let auth: any;
 
 try {
+  console.log('[Firebase] Calling initializeApp...');
   app = initializeApp(firebaseConfig);
-  console.log('Firebase app initialized successfully');
+  console.log('[Firebase] initializeApp successful');
   
-  // Try to initialize auth with persistence first
+  // Try to initialize auth with persistence
   try {
+    console.log('[Firebase] Initializing auth with AsyncStorage...');
     auth = initializeAuth(app, {
       persistence: getReactNativePersistence(AsyncStorage)
     });
-    console.log('Auth initialized with AsyncStorage persistence');
-  } catch (authError) {
-    console.warn('AsyncStorage persistence failed, falling back to default auth:', authError);
+    console.log('[Firebase] Auth initialized with AsyncStorage');
+  } catch (authError: any) {
+    console.warn('[Firebase] AsyncStorage auth failed:', authError?.message);
+    console.log('[Firebase] Falling back to getAuth...');
     auth = getAuth(app);
-    console.log('Auth initialized with default persistence');
+    console.log('[Firebase] Auth initialized with getAuth');
   }
-} catch (firebaseError) {
-  console.error('Firebase initialization failed:', firebaseError);
-  throw firebaseError;
+} catch (error: any) {
+  console.error('[Firebase] CRITICAL:', error?.message || JSON.stringify(error));
+  console.error('[Firebase] Stack:', error?.stack);
 }
 
-export { auth };
+const db = getFirestore(app);
+const storage = getStorage(app);
 
-export const db = getFirestore(app);
-export const storage = getStorage(app);
+console.log('[Firebase] Exports - auth:', !!auth, 'db:', !!db, 'storage:', !!storage);
 
+export { app, auth, db, storage };
 export default app;
