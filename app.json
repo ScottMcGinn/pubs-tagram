@@ -2,7 +2,7 @@
   "expo": {
     "name": "Pubs-tagram",
     "slug": "pubs-tagram",
-    "version": "1.0.0",
+    "version": "1.0.0-beta.1",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "splash": {
@@ -19,9 +19,11 @@
       },
       "package": "com.pubstagram.app",
       "permissions": [
-        "CAMERA",
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE"
+        "android.permission.INTERNET",
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.RECORD_AUDIO"
       ]
     },
     "plugins": [
@@ -33,6 +35,11 @@
         }
       ]
     ],
-    "sdkVersion": "54.0.0"
+    "sdkVersion": "54.0.0",
+    "extra": {
+      "eas": {
+        "projectId": "be0193c6-e28e-4811-86a1-9cfc5a14f412"
+      }
+    }
   }
 }
