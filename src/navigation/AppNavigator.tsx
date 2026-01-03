@@ -12,10 +12,6 @@ import PubDetailScreen from '../screens/PubDetailScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { UserProfileScreen } from '../screens/UserProfileScreen';
 import { SearchScreen } from '../screens/SearchScreen';
-import { DiscoverScreen } from '../screens/DiscoverScreen';
-import { FollowersListScreen } from '../screens/FollowersListScreen';
-import { FollowingListScreen } from '../screens/FollowingListScreen';
-import { ExploreScreen } from '../screens/ExploreScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -62,26 +58,6 @@ function AppTabs() {
         })}
       />
       <Tab.Screen
-        name="DiscoverTab"
-        component={DiscoverScreen}
-        options={{
-          title: 'Discover',
-          headerShown: true,
-          tabBarLabel: 'Discover',
-          tabBarIcon: ({ color }: any) => <Text style={{ fontSize: 20, color }}>⭐</Text>,
-        }}
-      />
-      <Tab.Screen
-        name="ExploreTab"
-        component={ExploreScreen}
-        options={{
-          title: 'Explore',
-          headerShown: true,
-          tabBarLabel: 'Explore',
-          tabBarIcon: ({ color }: any) => <Text style={{ fontSize: 20, color }}>🔍</Text>,
-        }}
-      />
-      <Tab.Screen
         name="ProfileTab"
         component={ProfileScreen}
         options={{
@@ -116,11 +92,6 @@ function AppStack() {
       <Stack.Screen name="PubDetail" component={PubDetailScreen} options={{ title: 'Pub Details', headerShown: true }} />
       <Stack.Screen name="Search" component={SearchScreen} options={{ title: 'Search Users', headerShown: true }} />
       <Stack.Screen name="UserProfile" component={UserProfileScreen} options={{ title: 'User Profile', headerShown: true }} />
-      <Stack.Screen name="FollowersList" component={FollowersListScreen} options={{ headerShown: false }} />
-      <Stack.Screen name="FollowingList" component={FollowingListScreen} options={{ headerShown: false }} />
-      <Stack.Screen name="Discover" component={DiscoverScreen} options={{ title: 'Discover', headerShown: true }} />
-      <Stack.Screen name="Explore" component={ExploreScreen} options={{ title: 'Explore', headerShown: true }} />
-      <Stack.Screen name="Profile" component={ProfileScreen} options={{ title: 'Profile', headerShown: true }} />
     </Stack.Navigator>
   );
 }

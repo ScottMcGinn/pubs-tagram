@@ -1,0 +1,44 @@
+BETA APK BUILD - STATUS @ JAN 3, 2026 12:02 AM
+==============================================
+
+CURRENT ISSUE:
+- APK builds successfully but crashes silently when opened on physical device
+- Emulator also fails to boot
+- Dev mode (local Expo) works fine
+
+WHAT WE'VE DONE:
+1. Added error logging to App.tsx (ErrorBoundary component) to display crash messages
+2. Changed Firebase auth from getAuth() back to initializeAuth() with AsyncStorage persistence
+3. Simplified navigation - removed Discover, Explore, FollowersListScreen, FollowingListScreen temporarily
+4. Kept only: FeedScreen, ProfileScreen, AddPubScreen, PubDetailScreen, SearchScreen, UserProfileScreen
+
+CURRENT BUILD STATUS:
+- Latest build rebuilding with simplified navigation
+- Should be ready to test soon
+
+NEXT STEPS (DO THESE WHEN YOU WAKE UP):
+1. Download latest APK from EAS dashboard (https://eas.expo.dev/accounts/ozscouser/projects/pubs-tagram/builds)
+2. Install on physical Android device
+3. Open app - error message should now display on screen instead of silent crash
+4. Screenshot the error message and share it
+5. Once we see the error, we'll know which screen/component is causing the issue
+
+IF APP WORKS WITH SIMPLIFIED NAV:
+- We know one of the removed screens is the problem
+- Progressively add them back one by one to isolate which one
+- Fix that specific screen
+
+IF APP STILL CRASHES:
+- Problem is in FeedScreen or ProfileScreen initialization
+- Will need to add more detailed logging to those screens
+
+KEY FILES MODIFIED:
+- App.tsx: Added ErrorBoundary with detailed error display
+- src/services/firebase.ts: initializeAuth with AsyncStorage persistence
+- src/navigation/AppNavigator.tsx: Removed problematic screens temporarily
+
+IMPORTANT: 
+- Dev mode still works, so code isn't fundamentally broken
+- Build process works, so it's not a TypeScript/compilation issue
+- Error only happens in standalone APK, not in dev
+- This suggests it's a runtime initialization issue specific to standalone builds

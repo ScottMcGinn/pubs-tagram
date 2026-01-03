@@ -4,16 +4,63 @@ import { AuthProvider } from './src/contexts/AuthContext';
 import { UserProvider } from './src/contexts/UserContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import { StatusBar } from 'expo-status-bar';
+import { View, Text, ScrollView } from 'react-native';
+
+class ErrorBoundary extends React.Component<any, { hasError: boolean; error: Error | null; errorInfo: string }> {
+  constructor(props: any) {
+    super(props);
+    this.state = { hasError: false, error: null, errorInfo: '' };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: any) {
+    console.error('App Error:', error);
+    console.error('Error Info:', errorInfo);
+    this.setState({ errorInfo: errorInfo.componentStack || '' });
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <View style={{ flex: 1, backgroundColor: '#fff', paddingTop: 50 }}>
+          <ScrollView style={{ padding: 20 }}>
+            <Text style={{ fontSize: 18, fontWeight: 'bold', color: 'red', marginBottom: 10 }}>
+              Crash Error:
+            </Text>
+            <Text style={{ fontSize: 14, color: '#333', marginBottom: 20 }}>
+              {this.state.error?.message || 'Unknown error'}
+            </Text>
+            <Text style={{ fontSize: 14, color: '#666', marginBottom: 10 }}>
+              {this.state.error?.toString()}
+            </Text>
+            <Text style={{ fontSize: 12, color: '#999' }}>
+              {this.state.errorInfo}
+            </Text>
+          </ScrollView>
+        </View>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 export default function App() {
+  console.log('App.tsx: Rendering App component');
+  
   return (
-    <AuthProvider>
-      <UserProvider>
-        <NavigationContainer>
-          <StatusBar style="auto" />
-          <AppNavigator />
-        </NavigationContainer>
-      </UserProvider>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <UserProvider>
+          <NavigationContainer>
+            <StatusBar style="auto" />
+            <AppNavigator />
+          </NavigationContainer>
+        </UserProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
