@@ -11,7 +11,7 @@ const firebaseConfig = {
   projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID || "pubs-tagram",
   storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET || "pubs-tagram.firebasestorage.app",
   messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "905466838608",
-  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID || "1:905466838608:web:ddf687816379658d93db55"
+  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID || "1:905466838608:web:bcb99968896eef9893db55"
 };
 
 console.log('[Firebase] Module loading - projectId:', firebaseConfig.projectId);
