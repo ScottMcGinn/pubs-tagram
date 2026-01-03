@@ -13,7 +13,17 @@ const firebaseConfig = {
   appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID || "1:905466838608:web:bcb99968896eef9893db55"
 };
 
+console.log('[Firebase] Environment variables at runtime:');
+console.log('[Firebase] EXPO_PUBLIC_FIREBASE_API_KEY length:', (process.env.EXPO_PUBLIC_FIREBASE_API_KEY || '').length);
+console.log('[Firebase] EXPO_PUBLIC_FIREBASE_API_KEY:', process.env.EXPO_PUBLIC_FIREBASE_API_KEY);
+console.log('[Firebase] EXPO_PUBLIC_FIREBASE_PROJECT_ID:', process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID);
 console.log('[Firebase] Module loading - projectId:', firebaseConfig.projectId);
+console.log('[Firebase] Full config:', {
+  apiKeyLength: firebaseConfig.apiKey.length,
+  authDomain: firebaseConfig.authDomain,
+  projectId: firebaseConfig.projectId,
+  storageBucket: firebaseConfig.storageBucket
+});
 
 // Initialize Firebase synchronously
 let app: any = null;
