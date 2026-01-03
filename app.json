@@ -18,6 +18,8 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.pubstagram.app",
+      "minSdkVersion": 21,
+      "targetSdkVersion": 34,
       "permissions": [
         "android.permission.INTERNET",
         "android.permission.CAMERA",
