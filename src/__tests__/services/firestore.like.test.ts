@@ -8,14 +8,9 @@ import {
   hasDislikedPub,
   getDislikeCount,
 } from '../../services/firestore';
-import { db } from '../../services/firebase';
-import { doc, setDoc, deleteDoc, getDoc, getDocs, collection } from 'firebase/firestore';
 
-// Mock Firebase Firestore
-jest.mock('firebase/firestore');
-jest.mock('../../services/firebase', () => ({
-  db: {}, // Mock db object
-}));
+// Mock React Native Firebase Firestore
+jest.mock('@react-native-firebase/firestore');
 
 describe('Firestore Like/Dislike Functions', () => {
   const mockUserId = 'user123';

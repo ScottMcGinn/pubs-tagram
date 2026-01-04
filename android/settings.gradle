@@ -1,0 +1,3 @@
+rootProject.name = 'Pubs-tagram'
+
+include ':app'

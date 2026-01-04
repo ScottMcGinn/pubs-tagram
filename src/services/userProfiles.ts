@@ -1,40 +1,28 @@
-import {
-  collection,
-  doc,
-  getDoc,
-  setDoc,
-  updateDoc,
-  query,
-  where,
-  getDocs,
-  Timestamp,
-  deleteDoc,
-  writeBatch,
-} from 'firebase/firestore';
-import { db, storage } from './firebase';
-import { ref, uploadString, getDownloadURL, deleteObject } from 'firebase/storage';
+import firestore from '@react-native-firebase/firestore';
+import storage from '@react-native-firebase/storage';
+import RNFS from 'react-native-fs';
 import { UserProfile } from '../types';
 
 /**
  * Create a new user profile
  */
 export const createUserProfile = async (uid: string, displayName: string, email: string): Promise<UserProfile> => {
-  const userRef = doc(collection(db, 'users'), uid);
+  const timestamp = firestore.Timestamp.now();
   
   const profileData: any = {
     uid,
     email,
     displayName,
     bio: '',
-    createdAt: Timestamp.now(),
-    updatedAt: Timestamp.now(),
+    createdAt: timestamp,
+    updatedAt: timestamp,
     isPublic: true,
     followers: [],
     following: [],
     // Don't include profilePictureUrl if undefined - Firestore rejects undefined values
   };
 
-  await setDoc(userRef, profileData);
+  await firestore().collection('users').doc(uid).set(profileData);
   return profileData as UserProfile;
 };
 
@@ -43,10 +31,9 @@ export const createUserProfile = async (uid: string, displayName: string, email:
  */
 export const getUserProfile = async (uid: string): Promise<UserProfile | null> => {
   try {
-    const userRef = doc(db, 'users', uid);
-    const userSnap = await getDoc(userRef);
+    const userSnap = await firestore().collection('users').doc(uid).get();
 
-    if (!userSnap.exists()) {
+    if (!userSnap.exists) {
       return null;
     }
 
@@ -72,11 +59,9 @@ export const updateUserProfile = async (
   updates: Partial<Omit<UserProfile, 'uid' | 'email' | 'createdAt'>>
 ): Promise<void> => {
   try {
-    const userRef = doc(db, 'users', uid);
-    
-    await updateDoc(userRef, {
+    await firestore().collection('users').doc(uid).update({
       ...updates,
-      updatedAt: Timestamp.now(),
+      updatedAt: firestore.Timestamp.now(),
     });
   } catch (error) {
     console.error('Error updating user profile:', error);
@@ -90,20 +75,20 @@ export const updateUserProfile = async (
 export const uploadProfilePicture = async (uid: string, fileUri: string): Promise<string> => {
   try {
     // First ensure profile document exists
-    const profileRef = doc(db, 'users', uid);
-    const profileSnap = await getDoc(profileRef);
+    const profileSnap = await firestore().collection('users').doc(uid).get();
     
-    if (!profileSnap.exists()) {
+    if (!profileSnap.exists) {
       // Create profile if it doesn't exist
-      await setDoc(profileRef, {
+      const timestamp = firestore.Timestamp.now();
+      await firestore().collection('users').doc(uid).set({
         uid,
         email: '',
         displayName: 'User',
         bio: '',
         profilePictureUrl: fileUri,
         isPublic: true,
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
+        createdAt: timestamp,
+        updatedAt: timestamp,
       });
     } else {
       // Update existing profile
@@ -124,8 +109,8 @@ export const uploadProfilePicture = async (uid: string, fileUri: string): Promis
  */
 export const deleteProfilePicture = async (uid: string): Promise<void> => {
   try {
-    const storageRef = ref(storage, `profiles/${uid}/profile.jpg`);
-    await deleteObject(storageRef);
+    const storageRef = storage().ref(`profiles/${uid}/profile.jpg`);
+    await storageRef.delete();
 
     // Update profile to remove picture URL
     await updateUserProfile(uid, {
@@ -154,11 +139,7 @@ export const searchUsers = async (
   try {
     // Fetch all users (no privacy filter since all authenticated users can see all profiles)
     // Note: In production with large user bases, consider using Algolia or similar
-    const q = query(
-      collection(db, 'users')
-    );
-
-    const snapshot = await getDocs(q);
+    const snapshot = await firestore().collection('users').get();
     const users = snapshot.docs.map(doc => doc.data() as UserProfile);
 
     // Client-side filtering with support for future features
@@ -185,9 +166,8 @@ export const searchUsers = async (
  */
 export const userProfileExists = async (uid: string): Promise<boolean> => {
   try {
-    const userRef = doc(db, 'users', uid);
-    const userSnap = await getDoc(userRef);
-    return userSnap.exists();
+    const userSnap = await firestore().collection('users').doc(uid).get();
+    return Boolean(userSnap.exists);
   } catch (error) {
     console.error('Error checking user profile:', error);
     return false;
@@ -208,11 +188,11 @@ export const getPublicProfiles = async (
 ): Promise<UserProfile[]> => {
   try {
     // Fetch all users (no privacy filter since all authenticated users can see all profiles)
-    const q = query(
-      collection(db, 'users')
-    );
+    const snapshot = await firestore()
+      .collection('users')
+      .where('isPublic', '==', true)
+      .get();
 
-    const snapshot = await getDocs(q);
     return snapshot.docs
       .map(doc => doc.data() as UserProfile)
       .filter(user => {
@@ -236,12 +216,10 @@ export const getPublicProfiles = async (
 export const followUser = async (currentUserId: string, targetUserId: string): Promise<void> => {
   try {
     // Create a document in the follows collection
-    const followRef = doc(collection(db, 'follows'));
-    
-    await setDoc(followRef, {
+    await firestore().collection('follows').add({
       follower: currentUserId,
       following: targetUserId,
-      createdAt: Timestamp.now(),
+      createdAt: firestore.Timestamp.now(),
     });
   } catch (error) {
     console.error('Error following user:', error);
@@ -255,16 +233,14 @@ export const followUser = async (currentUserId: string, targetUserId: string): P
 export const unfollowUser = async (currentUserId: string, targetUserId: string): Promise<void> => {
   try {
     // Find and delete the follow relationship
-    const q = query(
-      collection(db, 'follows'),
-      where('follower', '==', currentUserId),
-      where('following', '==', targetUserId)
-    );
+    const snapshot = await firestore()
+      .collection('follows')
+      .where('follower', '==', currentUserId)
+      .where('following', '==', targetUserId)
+      .get();
 
-    const snapshot = await getDocs(q);
-    
     for (const doc of snapshot.docs) {
-      await deleteDoc(doc.ref);
+      await doc.ref.delete();
     }
   } catch (error) {
     console.error('Error unfollowing user:', error);
@@ -277,13 +253,12 @@ export const unfollowUser = async (currentUserId: string, targetUserId: string):
  */
 export const isFollowing = async (currentUserId: string, targetUserId: string): Promise<boolean> => {
   try {
-    const q = query(
-      collection(db, 'follows'),
-      where('follower', '==', currentUserId),
-      where('following', '==', targetUserId)
-    );
+    const snapshot = await firestore()
+      .collection('follows')
+      .where('follower', '==', currentUserId)
+      .where('following', '==', targetUserId)
+      .get();
 
-    const snapshot = await getDocs(q);
     return snapshot.docs.length > 0;
   } catch (error) {
     console.error('Error checking follow status:', error);
@@ -296,12 +271,11 @@ export const isFollowing = async (currentUserId: string, targetUserId: string): 
  */
 export const getFollowersCount = async (userId: string): Promise<number> => {
   try {
-    const q = query(
-      collection(db, 'follows'),
-      where('following', '==', userId)
-    );
+    const snapshot = await firestore()
+      .collection('follows')
+      .where('following', '==', userId)
+      .get();
 
-    const snapshot = await getDocs(q);
     return snapshot.docs.length;
   } catch (error) {
     console.error('Error getting followers count:', error);
@@ -314,12 +288,11 @@ export const getFollowersCount = async (userId: string): Promise<number> => {
  */
 export const getFollowingCount = async (userId: string): Promise<number> => {
   try {
-    const q = query(
-      collection(db, 'follows'),
-      where('follower', '==', userId)
-    );
+    const snapshot = await firestore()
+      .collection('follows')
+      .where('follower', '==', userId)
+      .get();
 
-    const snapshot = await getDocs(q);
     return snapshot.docs.length;
   } catch (error) {
     console.error('Error getting following count:', error);
@@ -332,12 +305,11 @@ export const getFollowingCount = async (userId: string): Promise<number> => {
  */
 export const getFollowersList = async (userId: string): Promise<UserProfile[]> => {
   try {
-    const q = query(
-      collection(db, 'follows'),
-      where('following', '==', userId)
-    );
+    const snapshot = await firestore()
+      .collection('follows')
+      .where('following', '==', userId)
+      .get();
 
-    const snapshot = await getDocs(q);
     const followerIds = snapshot.docs.map(doc => doc.data().follower);
     
     // Fetch user profiles for all followers
@@ -361,12 +333,11 @@ export const getFollowersList = async (userId: string): Promise<UserProfile[]> =
  */
 export const getFollowingList = async (userId: string): Promise<UserProfile[]> => {
   try {
-    const q = query(
-      collection(db, 'follows'),
-      where('follower', '==', userId)
-    );
+    const snapshot = await firestore()
+      .collection('follows')
+      .where('follower', '==', userId)
+      .get();
 
-    const snapshot = await getDocs(q);
     const followingIds = snapshot.docs.map(doc => doc.data().following);
     
     // Fetch user profiles for all following users
@@ -393,22 +364,20 @@ export const getSuggestedUsers = async (currentUserId: string, limit: number = 2
     console.log('Getting suggested users for:', currentUserId);
     
     // Get all public users
-    const allUsersQuery = query(
-      collection(db, 'users'),
-      where('isPublic', '==', true)
-    );
+    const allUsersSnapshot = await firestore()
+      .collection('users')
+      .where('isPublic', '==', true)
+      .get();
     
-    const allUsersSnapshot = await getDocs(allUsersQuery);
     const allUsers = allUsersSnapshot.docs.map(doc => doc.data() as UserProfile);
     console.log('All public users:', allUsers.map(u => ({ uid: u.uid, displayName: u.displayName })));
     
     // Get current user's following list
-    const followingQuery = query(
-      collection(db, 'follows'),
-      where('follower', '==', currentUserId)
-    );
+    const followingSnapshot = await firestore()
+      .collection('follows')
+      .where('follower', '==', currentUserId)
+      .get();
     
-    const followingSnapshot = await getDocs(followingQuery);
     const followingIds = new Set(followingSnapshot.docs.map(doc => doc.data().following));
     console.log('Currently following:', Array.from(followingIds));
     

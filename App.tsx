@@ -3,7 +3,6 @@ import { NavigationContainer } from '@react-navigation/native';
 import { AuthProvider } from './src/contexts/AuthContext';
 import { UserProvider } from './src/contexts/UserContext';
 import AppNavigator from './src/navigation/AppNavigator';
-import { StatusBar } from 'expo-status-bar';
 import { View, Text, ScrollView } from 'react-native';
 
 // Catch errors at module import time

@@ -16,8 +16,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
 import { deletePub, likePub, unlikePub, hasLikedPub, getLikeCount, dislikePub, undislikePub, hasDislikedPub, getDislikeCount } from '../services/firestore';
 import { useAuth } from '../contexts/AuthContext';
-import { ref, deleteObject } from 'firebase/storage';
-import { storage } from '../services/firebase';
+import storage from '@react-native-firebase/storage';
 
 type PubDetailRouteProp = RouteProp<RootStackParamList, 'PubDetail'>;
 type PubDetailNavigationProp = StackNavigationProp<
@@ -148,8 +147,8 @@ const PubDetailScreen = () => {
           const urlObj = new URL(url);
           const path = decodeURIComponent(urlObj.pathname.split('/o/')[1].split('?')[0]);
           console.log('Deleting photo:', path);
-          const photoRef = ref(storage, path);
-          await deleteObject(photoRef);
+          const photoRef = storage().ref(path);
+          await photoRef.delete();
         } catch (error) {
           console.error('Error deleting photo:', error);
         }
@@ -160,8 +159,8 @@ const PubDetailScreen = () => {
           const urlObj = new URL(url);
           const path = decodeURIComponent(urlObj.pathname.split('/o/')[1].split('?')[0]);
           console.log('Deleting thumbnail:', path);
-          const thumbRef = ref(storage, path);
-          await deleteObject(thumbRef);
+          const thumbRef = storage().ref(path);
+          await thumbRef.delete();
         } catch (error) {
           console.error('Error deleting thumbnail:', error);
         }

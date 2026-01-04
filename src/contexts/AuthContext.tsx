@@ -1,18 +1,11 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut as firebaseSignOut,
-  onAuthStateChanged,
-  User,
-} from 'firebase/auth';
-import { auth } from '../services/firebase';
+import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import { createUserProfile } from '../services/userProfiles';
 
-console.log('[AuthContext] Module loading - auth available:', !!auth);
+console.log('[AuthContext] Module loading - React Native Firebase auth available:', !!auth);
 
 interface AuthContextType {
-  user: User | null;
+  user: FirebaseAuthTypes.User | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, displayName: string) => Promise<void>;
@@ -32,18 +25,12 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
     let timeoutId: NodeJS.Timeout;
-
-    if (!auth) {
-      console.error('[AuthContext] auth is null/undefined - cannot setup listener');
-      setLoading(false);
-      return;
-    }
 
     // Set a timeout to force loading to false after 15 seconds as a fallback
     timeoutId = setTimeout(() => {
@@ -55,19 +42,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     try {
       console.log('[AuthContext] Setting up onAuthStateChanged listener');
-      const unsubscribe = onAuthStateChanged(
-        auth,
+      const unsubscribe = auth().onAuthStateChanged(
         userState => {
           if (isMounted) {
             console.log('[AuthContext] Auth state changed:', !!userState);
             setUser(userState);
-            setLoading(false);
-            clearTimeout(timeoutId);
-          }
-        },
-        error => {
-          console.error('[AuthContext] Auth state error:', error);
-          if (isMounted) {
             setLoading(false);
             clearTimeout(timeoutId);
           }
@@ -90,12 +69,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const signIn = async (email: string, password: string) => {
     console.log('[AuthContext] signIn attempt for:', email);
-    if (!auth) {
-      throw new Error('Firebase Auth not initialized. Please restart the app.');
-    }
     try {
-      const result = await signInWithEmailAndPassword(auth, email, password);
-      console.log('[AuthContext] signIn successful:', result.user.uid);
+      await auth().signInWithEmailAndPassword(email, password);
+      console.log('[AuthContext] signIn successful');
     } catch (error: any) {
       console.error('[AuthContext] signIn error:', error?.message);
       throw error;
@@ -104,14 +80,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const signUp = async (email: string, password: string, displayName: string) => {
     console.log('[AuthContext] signUp attempt for:', email);
-    if (!auth) {
-      throw new Error('Firebase Auth not initialized. Please restart the app.');
-    }
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const result = await auth().createUserWithEmailAndPassword(email, password);
       console.log('[AuthContext] signUp successful, creating profile');
       // Create user profile after successful sign up with chosen display name
-      await createUserProfile(userCredential.user.uid, displayName, email);
+      await createUserProfile(result.user.uid, displayName, email);
       console.log('[AuthContext] User profile created');
     } catch (error: any) {
       console.error('[AuthContext] signUp error:', error?.message);
@@ -121,11 +94,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const signOut = async () => {
     console.log('[AuthContext] signOut attempt');
-    if (!auth) {
-      throw new Error('Firebase Auth not initialized. Please restart the app.');
-    }
     try {
-      await firebaseSignOut(auth);
+      await auth().signOut();
       console.log('[AuthContext] signOut successful');
     } catch (error: any) {
       console.error('[AuthContext] signOut error:', error?.message);

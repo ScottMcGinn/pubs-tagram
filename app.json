@@ -29,13 +29,10 @@
       ]
     },
     "plugins": [
-      [
-        "expo-image-picker",
-        {
-          "photosPermission": "Allow Pubs-tagram to access your photos to add pub pictures.",
-          "cameraPermission": "Allow Pubs-tagram to use your camera to take pub pictures."
-        }
-      ]
+      "@react-native-firebase/app",
+      "@react-native-firebase/auth",
+      "@react-native-firebase/firestore",
+      "@react-native-firebase/storage"
     ],
     "sdkVersion": "54.0.0",
     "extra": {

@@ -1,5 +1,5 @@
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { storage } from './firebase';
+import storage from '@react-native-firebase/storage';
+import RNFS from 'react-native-fs';
 
 export interface UploadResult {
   fullUrl: string;
@@ -15,32 +15,30 @@ export const uploadPubPhoto = async (
   index: number
 ): Promise<UploadResult> => {
   try {
-    // Convert URIs to blobs for web
-    const [photoBlob, thumbnailBlob] = await Promise.all([
-      fetch(photoUri).then(r => r.blob()),
-      fetch(thumbnailUri).then(r => r.blob()),
+    // Read files from disk for React Native
+    const [photoData, thumbnailData] = await Promise.all([
+      RNFS.readFile(photoUri, 'base64'),
+      RNFS.readFile(thumbnailUri, 'base64'),
     ]);
 
     // Create storage references
-    const photoRef = ref(
-      storage,
+    const photoRef = storage().ref(
       `users/${userId}/pubs/${pubId}/photo${index}.jpg`
     );
-    const thumbnailRef = ref(
-      storage,
+    const thumbnailRef = storage().ref(
       `users/${userId}/pubs/${pubId}/thumb${index}.jpg`
     );
 
     // Upload both images
     await Promise.all([
-      uploadBytes(photoRef, photoBlob),
-      uploadBytes(thumbnailRef, thumbnailBlob),
+      photoRef.putString(photoData, 'base64', { contentType: 'image/jpeg' }),
+      thumbnailRef.putString(thumbnailData, 'base64', { contentType: 'image/jpeg' }),
     ]);
 
     // Get download URLs
     const [fullUrl, thumbnailUrl] = await Promise.all([
-      getDownloadURL(photoRef),
-      getDownloadURL(thumbnailRef),
+      photoRef.getDownloadURL(),
+      thumbnailRef.getDownloadURL(),
     ]);
 
     return { fullUrl, thumbnailUrl };
