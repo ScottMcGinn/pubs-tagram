@@ -12,14 +12,6 @@
       "distribution": "internal",
       "android": {
         "buildType": "apk"
-      },
-      "env": {
-        "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyBNpryHI5g3-Dl3HcjtALPl8SOkQRQfX0Q",
-        "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "pubs-tagram.firebaseapp.com",
-        "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "pubs-tagram",
-        "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET": "pubs-tagram.firebasestorage.app",
-        "EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID": "905466838608",
-        "EXPO_PUBLIC_FIREBASE_APP_ID": "1:905466838608:android:e05a9ebff71807ad93db55"
       }
     },
     "production": {
