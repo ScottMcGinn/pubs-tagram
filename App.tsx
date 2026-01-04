@@ -59,19 +59,43 @@ class ErrorBoundary extends React.Component<any, { hasError: boolean; error: Err
   }
 }
 
+function AppContent() {
+  console.log('[App] AppContent rendering');
+  
+  return (
+    <NavigationContainer>
+      <StatusBar style="auto" />
+      <AppNavigator />
+    </NavigationContainer>
+  );
+}
+
 export default function App() {
   console.log('[App] App component rendering');
   
-  return (
-    <ErrorBoundary>
-      <AuthProvider>
-        <UserProvider>
-          <NavigationContainer>
-            <StatusBar style="auto" />
-            <AppNavigator />
-          </NavigationContainer>
-        </UserProvider>
-      </AuthProvider>
-    </ErrorBoundary>
-  );
+  try {
+    return (
+      <ErrorBoundary>
+        <AuthProvider>
+          <UserProvider>
+            <AppContent />
+          </UserProvider>
+        </AuthProvider>
+      </ErrorBoundary>
+    );
+  } catch (error: any) {
+    console.error('[App] Top-level render error:', error);
+    return (
+      <View style={{ flex: 1, backgroundColor: '#fff', paddingTop: 50 }}>
+        <ScrollView style={{ padding: 20 }}>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: 'red' }}>
+            App Failed to Initialize
+          </Text>
+          <Text style={{ fontSize: 14, marginTop: 10 }}>
+            {error?.message}
+          </Text>
+        </ScrollView>
+      </View>
+    );
+  }
 }
