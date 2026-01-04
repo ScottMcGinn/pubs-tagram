@@ -61,6 +61,7 @@ const AuthScreen = () => {
             <TextInput
               style={styles.input}
               placeholder="Email"
+              placeholderTextColor="#B0B0B0"
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
@@ -72,6 +73,7 @@ const AuthScreen = () => {
               <TextInput
                 style={styles.input}
                 placeholder="Username"
+                placeholderTextColor="#B0B0B0"
                 value={displayName}
                 onChangeText={setDisplayName}
                 autoCapitalize="none"
@@ -82,6 +84,7 @@ const AuthScreen = () => {
             <TextInput
               style={styles.input}
               placeholder="Password"
+              placeholderTextColor="#B0B0B0"
               value={password}
               onChangeText={setPassword}
               secureTextEntry
