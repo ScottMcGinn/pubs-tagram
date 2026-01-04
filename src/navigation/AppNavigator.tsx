@@ -19,8 +19,6 @@ import PubDetailScreen from '../screens/PubDetailScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { UserProfileScreen } from '../screens/UserProfileScreen';
 import { SearchScreen } from '../screens/SearchScreen';
-import { ExploreScreen } from '../screens/ExploreScreen';
-import { DiscoverScreen } from '../screens/DiscoverScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -87,28 +85,6 @@ function AppTabs() {
           tabBarLabel: 'Profile',
           tabBarIcon: ({ color }: any) => (
             <Text style={{ fontSize: 20, color }}>👤</Text>
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Explore"
-        component={ExploreScreen}
-        options={{
-          title: 'Explore',
-          tabBarLabel: 'Explore',
-          tabBarIcon: ({ color }: any) => (
-            <Text style={{ fontSize: 20, color }}>🗺️</Text>
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Discover"
-        component={DiscoverScreen}
-        options={{
-          title: 'Discover',
-          tabBarLabel: 'Discover',
-          tabBarIcon: ({ color }: any) => (
-            <Text style={{ fontSize: 20, color }}>⭐</Text>
           ),
         }}
       />
