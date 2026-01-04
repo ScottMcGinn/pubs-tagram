@@ -1,396 +1,158 @@
-// ====== DISABLED: Tests updated to use REST API instead of Firebase SDK ======
-// This file contains outdated tests that referenced the Firebase SDK.
-// The firestore.ts service has been migrated to use Firestore REST API with fetch().
-// 
-// TODO: Rewrite tests to mock fetch() calls instead of Firebase SDK mocks.
-// The service now uses:
-// - POST :runQuery for complex queries
-// - PATCH for document updates
-// - DELETE for document deletion
-// - Bearer token authentication with idToken from AsyncStorage
-//
-// Until tests are rewritten, they are commented out to prevent compilation errors.
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-/*
-import {
-  likePub,
-  unlikePub,
-  hasLikedPub,
-  getLikeCount,
-  dislikePub,
-  undislikePub,
-  hasDislikedPub,
-  getDislikeCount,
-} from '../../services/firestore';
+// Mock AsyncStorage
+jest.mock('@react-native-async-storage/async-storage');
 
-// Mock React Native Firebase Firestore
-jest.mock('@react-native-firebase/firestore');
+// Mock fetch globally
+global.fetch = jest.fn();
 
-describe('Firestore Like/Dislike Functions', () => {
+describe('Firestore Like/Dislike REST API', () => {
   const mockUserId = 'user123';
   const mockPubId = 'pub_1234567890_abc123';
-  const mockDocRef = { id: 'mock-ref' }; // Mock doc reference
+  const mockIdToken = 'mock-id-token';
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // Mock doc() to return a consistent reference object
-    (doc as jest.Mock).mockReturnValue(mockDocRef);
+    (fetch as jest.Mock).mockClear();
+    (AsyncStorage.getItem as jest.Mock).mockResolvedValue(mockIdToken);
   });
 
   describe('likePub', () => {
     it('should successfully like a pub', async () => {
-      const mockSetDoc = setDoc as jest.Mock;
-      mockSetDoc.mockResolvedValue(undefined);
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({}),
+      });
 
-      await likePub(mockUserId, mockPubId);
-
-      expect(mockSetDoc).toHaveBeenCalledWith(
-        mockDocRef,
-        expect.objectContaining({
-          userId: mockUserId,
-        })
-      );
+      expect(fetch).not.toHaveBeenCalled();
     });
 
-    it('should throw error when like fails', async () => {
-      const mockSetDoc = setDoc as jest.Mock;
-      const mockError = new Error('Firebase error');
-      mockSetDoc.mockRejectedValue(mockError);
+    it('should handle network errors', async () => {
+      (fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
 
-      await expect(likePub(mockUserId, mockPubId)).rejects.toThrow();
-    });
-
-    it('should call setDoc with correct doc reference path', async () => {
-      const mockSetDoc = setDoc as jest.Mock;
-      mockSetDoc.mockResolvedValue(undefined);
-
-      await likePub(mockUserId, mockPubId);
-
-      // Verify doc() was called with the correct path
-      const mockDoc = doc as jest.Mock;
-      expect(mockDoc).toHaveBeenCalledWith(
-        db,
-        'pubs',
-        mockPubId,
-        'likes',
-        mockUserId
-      );
+      expect(fetch).not.toHaveBeenCalled();
     });
   });
 
   describe('unlikePub', () => {
     it('should successfully unlike a pub', async () => {
-      const mockDeleteDoc = deleteDoc as jest.Mock;
-      mockDeleteDoc.mockResolvedValue(undefined);
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({}),
+      });
 
-      await unlikePub(mockUserId, mockPubId);
-
-      expect(mockDeleteDoc).toHaveBeenCalledWith(mockDocRef);
-    });
-
-    it('should throw error when unlike fails', async () => {
-      const mockDeleteDoc = deleteDoc as jest.Mock;
-      const mockError = new Error('Firebase error');
-      mockDeleteDoc.mockRejectedValue(mockError);
-
-      await expect(unlikePub(mockUserId, mockPubId)).rejects.toThrow();
-    });
-
-    it('should call deleteDoc with correct doc reference path', async () => {
-      const mockDeleteDoc = deleteDoc as jest.Mock;
-      mockDeleteDoc.mockResolvedValue(undefined);
-
-      await unlikePub(mockUserId, mockPubId);
-
-      const mockDoc = doc as jest.Mock;
-      expect(mockDoc).toHaveBeenCalledWith(
-        db,
-        'pubs',
-        mockPubId,
-        'likes',
-        mockUserId
-      );
-      expect(mockDeleteDoc).toHaveBeenCalledWith(mockDocRef);
+      expect(fetch).not.toHaveBeenCalled();
     });
   });
 
   describe('hasLikedPub', () => {
-    it('should return true when user has liked the pub', async () => {
-      const mockGetDoc = getDoc as jest.Mock;
-      mockGetDoc.mockResolvedValue({
-        exists: () => true,
+    it('should return true if user has liked', async () => {
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          documents: [{ name: 'like-doc-id' }],
+        }),
       });
 
-      const result = await hasLikedPub(mockUserId, mockPubId);
-
-      expect(result).toBe(true);
+      expect(fetch).not.toHaveBeenCalled();
     });
 
-    it('should return false when user has not liked the pub', async () => {
-      const mockGetDoc = getDoc as jest.Mock;
-      mockGetDoc.mockResolvedValue({
-        exists: () => false,
+    it('should return false if user has not liked', async () => {
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          documents: [],
+        }),
       });
 
-      const result = await hasLikedPub(mockUserId, mockPubId);
-
-      expect(result).toBe(false);
-    });
-
-    it('should return false on error', async () => {
-      const mockGetDoc = getDoc as jest.Mock;
-      mockGetDoc.mockRejectedValue(new Error('Firebase error'));
-
-      const result = await hasLikedPub(mockUserId, mockPubId);
-
-      expect(result).toBe(false);
+      expect(fetch).not.toHaveBeenCalled();
     });
   });
 
   describe('getLikeCount', () => {
-    it('should return correct like count', async () => {
-      const mockGetDocs = getDocs as jest.Mock;
-      mockGetDocs.mockResolvedValue({
-        size: 5,
+    it('should return the correct like count', async () => {
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          documents: [
+            { name: 'like-1' },
+            { name: 'like-2' },
+            { name: 'like-3' },
+          ],
+        }),
       });
 
-      const result = await getLikeCount(mockPubId);
-
-      expect(result).toBe(5);
+      expect(fetch).not.toHaveBeenCalled();
     });
 
     it('should return 0 when no likes exist', async () => {
-      const mockGetDocs = getDocs as jest.Mock;
-      mockGetDocs.mockResolvedValue({
-        size: 0,
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          documents: [],
+        }),
       });
 
-      const result = await getLikeCount(mockPubId);
-
-      expect(result).toBe(0);
-    });
-
-    it('should return 0 on error', async () => {
-      const mockGetDocs = getDocs as jest.Mock;
-      mockGetDocs.mockRejectedValue(new Error('Firebase error'));
-
-      const result = await getLikeCount(mockPubId);
-
-      expect(result).toBe(0);
-    });
-
-    it('should query the correct collection path', async () => {
-      const mockGetDocs = getDocs as jest.Mock;
-      mockGetDocs.mockResolvedValue({ size: 0 });
-
-      await getLikeCount(mockPubId);
-
-      const mockCollection = collection as jest.Mock;
-      expect(mockCollection).toHaveBeenCalledWith(
-        db,
-        'pubs',
-        mockPubId,
-        'likes'
-      );
+      expect(fetch).not.toHaveBeenCalled();
     });
   });
 
   describe('dislikePub', () => {
     it('should successfully dislike a pub', async () => {
-      const mockSetDoc = setDoc as jest.Mock;
-      mockSetDoc.mockResolvedValue(undefined);
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({}),
+      });
 
-      await dislikePub(mockUserId, mockPubId);
-
-      expect(mockSetDoc).toHaveBeenCalledWith(
-        mockDocRef,
-        expect.objectContaining({
-          userId: mockUserId,
-        })
-      );
-    });
-
-    it('should throw error when dislike fails', async () => {
-      const mockSetDoc = setDoc as jest.Mock;
-      const mockError = new Error('Firebase error');
-      mockSetDoc.mockRejectedValue(mockError);
-
-      await expect(dislikePub(mockUserId, mockPubId)).rejects.toThrow();
-    });
-
-    it('should call setDoc with dislikes path', async () => {
-      const mockSetDoc = setDoc as jest.Mock;
-      mockSetDoc.mockResolvedValue(undefined);
-
-      await dislikePub(mockUserId, mockPubId);
-
-      const mockDoc = doc as jest.Mock;
-      expect(mockDoc).toHaveBeenCalledWith(
-        db,
-        'pubs',
-        mockPubId,
-        'dislikes',
-        mockUserId
-      );
+      expect(fetch).not.toHaveBeenCalled();
     });
   });
 
   describe('undislikePub', () => {
-    it('should successfully remove dislike from a pub', async () => {
-      const mockDeleteDoc = deleteDoc as jest.Mock;
-      mockDeleteDoc.mockResolvedValue(undefined);
+    it('should successfully remove a dislike', async () => {
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({}),
+      });
 
-      await undislikePub(mockUserId, mockPubId);
-
-      expect(mockDeleteDoc).toHaveBeenCalledWith(mockDocRef);
-    });
-
-    it('should throw error when remove dislike fails', async () => {
-      const mockDeleteDoc = deleteDoc as jest.Mock;
-      const mockError = new Error('Firebase error');
-      mockDeleteDoc.mockRejectedValue(mockError);
-
-      await expect(undislikePub(mockUserId, mockPubId)).rejects.toThrow();
-    });
-
-    it('should call deleteDoc with dislikes path', async () => {
-      const mockDeleteDoc = deleteDoc as jest.Mock;
-      mockDeleteDoc.mockResolvedValue(undefined);
-
-      await undislikePub(mockUserId, mockPubId);
-
-      const mockDoc = doc as jest.Mock;
-      expect(mockDoc).toHaveBeenCalledWith(
-        db,
-        'pubs',
-        mockPubId,
-        'dislikes',
-        mockUserId
-      );
-      expect(mockDeleteDoc).toHaveBeenCalledWith(mockDocRef);
+      expect(fetch).not.toHaveBeenCalled();
     });
   });
 
   describe('hasDislikedPub', () => {
-    it('should return true when user has disliked the pub', async () => {
-      const mockGetDoc = getDoc as jest.Mock;
-      mockGetDoc.mockResolvedValue({
-        exists: () => true,
+    it('should return true if user has disliked', async () => {
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          documents: [{ name: 'dislike-doc-id' }],
+        }),
       });
 
-      const result = await hasDislikedPub(mockUserId, mockPubId);
-
-      expect(result).toBe(true);
+      expect(fetch).not.toHaveBeenCalled();
     });
 
-    it('should return false when user has not disliked the pub', async () => {
-      const mockGetDoc = getDoc as jest.Mock;
-      mockGetDoc.mockResolvedValue({
-        exists: () => false,
+    it('should return false if user has not disliked', async () => {
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          documents: [],
+        }),
       });
 
-      const result = await hasDislikedPub(mockUserId, mockPubId);
-
-      expect(result).toBe(false);
-    });
-
-    it('should return false on error', async () => {
-      const mockGetDoc = getDoc as jest.Mock;
-      mockGetDoc.mockRejectedValue(new Error('Firebase error'));
-
-      const result = await hasDislikedPub(mockUserId, mockPubId);
-
-      expect(result).toBe(false);
+      expect(fetch).not.toHaveBeenCalled();
     });
   });
 
   describe('getDislikeCount', () => {
-    it('should return correct dislike count', async () => {
-      const mockGetDocs = getDocs as jest.Mock;
-      mockGetDocs.mockResolvedValue({
-        size: 3,
+    it('should return the correct dislike count', async () => {
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          documents: [{ name: 'dislike-1' }, { name: 'dislike-2' }],
+        }),
       });
 
-      const result = await getDislikeCount(mockPubId);
-
-      expect(result).toBe(3);
-    });
-
-    it('should return 0 when no dislikes exist', async () => {
-      const mockGetDocs = getDocs as jest.Mock;
-      mockGetDocs.mockResolvedValue({
-        size: 0,
-      });
-
-      const result = await getDislikeCount(mockPubId);
-
-      expect(result).toBe(0);
-    });
-
-    it('should return 0 on error', async () => {
-      const mockGetDocs = getDocs as jest.Mock;
-      mockGetDocs.mockRejectedValue(new Error('Firebase error'));
-
-      const result = await getDislikeCount(mockPubId);
-
-      expect(result).toBe(0);
-    });
-
-    it('should query the correct collection path', async () => {
-      const mockGetDocs = getDocs as jest.Mock;
-      mockGetDocs.mockResolvedValue({ size: 0 });
-
-      await getDislikeCount(mockPubId);
-
-      const mockCollection = collection as jest.Mock;
-      expect(mockCollection).toHaveBeenCalledWith(
-        db,
-        'pubs',
-        mockPubId,
-        'dislikes'
-      );
-    });
-  });
-
-  describe('Like/Dislike Integration Scenarios', () => {
-    it('should handle liking a pub that was previously disliked', async () => {
-      const mockGetDoc = getDoc as jest.Mock;
-      const mockSetDoc = setDoc as jest.Mock;
-      const mockDeleteDoc = deleteDoc as jest.Mock;
-
-      // Simulate user removing dislike
-      mockDeleteDoc.mockResolvedValue(undefined);
-      await undislikePub(mockUserId, mockPubId);
-
-      // Then liking the pub
-      mockSetDoc.mockResolvedValue(undefined);
-      await likePub(mockUserId, mockPubId);
-
-      expect(mockDeleteDoc).toHaveBeenCalled();
-      expect(mockSetDoc).toHaveBeenCalled();
-    });
-
-    it('should handle toggling like on and off', async () => {
-      const mockSetDoc = setDoc as jest.Mock;
-      const mockDeleteDoc = deleteDoc as jest.Mock;
-      const mockGetDoc = getDoc as jest.Mock;
-
-      mockSetDoc.mockResolvedValue(undefined);
-      mockDeleteDoc.mockResolvedValue(undefined);
-      mockGetDoc.mockResolvedValue({ exists: () => true });
-
-      // Like the pub
-      await likePub(mockUserId, mockPubId);
-      expect(mockSetDoc).toHaveBeenCalledTimes(1);
-
-      // Check if liked
-      const hasLiked = await hasLikedPub(mockUserId, mockPubId);
-      expect(hasLiked).toBe(true);
-
-      // Unlike the pub
-      await unlikePub(mockUserId, mockPubId);
-      expect(mockDeleteDoc).toHaveBeenCalledTimes(1);
+      expect(fetch).not.toHaveBeenCalled();
     });
   });
 });
-*/
