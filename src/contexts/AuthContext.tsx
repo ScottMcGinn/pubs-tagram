@@ -2,7 +2,7 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createUserProfile } from '../services/userProfiles';
 
-const FIREBASE_API_KEY = process.env.firebase_api_key;
+const FIREBASE_API_KEY = process.env.EXPO_PUBLIC_FIREBASE_API_KEY;
 const AUTH_URL = 'https://identitytoolkit.googleapis.com/v1/accounts';
 
 export interface AuthUser {
