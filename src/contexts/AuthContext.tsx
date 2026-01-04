@@ -137,6 +137,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const { localId: uid, idToken } = signUpData;
       console.log('[AuthContext] signUp successful, uid:', uid);
 
+      // Save idToken to AsyncStorage first (needed by createUserProfile)
+      await AsyncStorage.setItem('idToken', idToken);
+
       // Create user profile in Firestore
       await createUserProfile(uid, {
         email,
@@ -155,7 +158,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       setUser(authUser);
       await AsyncStorage.setItem('authUser', JSON.stringify(authUser));
-      await AsyncStorage.setItem('idToken', idToken);
     } catch (error) {
       console.error('[AuthContext] Sign up error:', error);
       throw error;
