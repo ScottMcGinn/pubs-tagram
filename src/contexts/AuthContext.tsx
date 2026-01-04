@@ -60,6 +60,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const signIn = async (email: string, password: string) => {
     try {
+      console.log('[AuthContext] Starting signIn with email:', email);
       // Sign in via Firebase Auth REST API
       const signInResponse = await fetch(
         `${AUTH_URL}:signInWithPassword?key=${FIREBASE_API_KEY}`,
@@ -74,13 +75,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         }
       );
 
+      console.log('[AuthContext] signIn response status:', signInResponse.status);
+
       if (!signInResponse.ok) {
         const error = await signInResponse.json();
+        console.error('[AuthContext] signIn error response:', error);
         throw new Error(error.error?.message || 'Sign in failed');
       }
 
       const signInData = await signInResponse.json();
       const { localId: uid, idToken, displayName } = signInData;
+      console.log('[AuthContext] signIn successful, uid:', uid);
 
       const authUser: AuthUser = {
         uid,
@@ -92,8 +97,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setUser(authUser);
       await AsyncStorage.setItem('authUser', JSON.stringify(authUser));
       await AsyncStorage.setItem('idToken', idToken);
+      console.log('[AuthContext] User stored in AsyncStorage');
     } catch (error) {
-      console.error('[AuthContext] Sign in error:', error);
+      console.error('[AuthContext] Sign in exception:', error);
       throw error;
     }
   };
@@ -104,6 +110,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     displayName: string
   ) => {
     try {
+      console.log('[AuthContext] Starting signUp with email:', email);
       // Create user account via Firebase Auth REST API
       const signUpResponse = await fetch(
         `${AUTH_URL}:signUp?key=${FIREBASE_API_KEY}`,
@@ -118,13 +125,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         }
       );
 
+      console.log('[AuthContext] signUp response status:', signUpResponse.status);
+
       if (!signUpResponse.ok) {
         const error = await signUpResponse.json();
+        console.error('[AuthContext] signUp error response:', error);
         throw new Error(error.error?.message || 'Sign up failed');
       }
 
       const signUpData = await signUpResponse.json();
       const { localId: uid, idToken } = signUpData;
+      console.log('[AuthContext] signUp successful, uid:', uid);
 
       // Create user profile in Firestore
       await createUserProfile(uid, {
@@ -133,6 +144,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         photoUrl: null,
         createdAt: new Date(),
       });
+      console.log('[AuthContext] User profile created');
 
       const authUser: AuthUser = {
         uid,
