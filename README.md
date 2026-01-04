@@ -124,13 +124,40 @@ Then:
 ### Core Features ✅
 - Sign up / Sign in with email/password
 - Add pub entries with photos, ratings, and details
-- View pubs in Instagram-style feed and explore grid
-- Swipe through photos on detail view
+- Rate pubs with:
+  - 💷 Value for Money (1-5 £ symbols)
+  - 🍺 Beer Quality (1-5 beer glass emojis)
+  - 🥧 Food Quality (1-5 pie emojis, optional)
+- View pubs in Instagram-style feed with photos and ratings
+- Swipe through photos in feed cards
+- Tap pub cards to view full details with all ratings
 - Like/dislike pubs with 👍 and 👎 buttons
-- Follow/unfollow users
-- View user profiles with follower counts
+- Track like/dislike counts per pub
+- Photo carousel on pub detail view with navigation
+
+### Social & Profile Features ✅
+- Follow/unfollow other users
+- View follower and following counts
+- User profiles with:
+  - Profile picture (auto-generated avatar with initials if not uploaded)
+  - Display name and bio
+  - Follower/Following buttons with counts
+  - Grid and list views of user's pub entries
 - Search users by display name
-- Responsive design (mobile & tablet)
+- View other users' profiles and their pub history
+- Like/dislike as a way to rate pubs
+
+### User Profile Management ✅
+- Upload custom profile picture
+- Edit profile information (display name, bio)
+- View your own profile with stats
+- Delete profile picture
+
+### Responsive Design ✅
+- Mobile-optimized interface
+- Tablet/desktop compatible layouts
+- Responsive grid views for pub cards
+- Adaptive photo carousel and controls
 
 ### Coming Soon 🚀
 - Private profiles / blocking users
@@ -138,6 +165,8 @@ Then:
 - Advanced search filters
 - Push notifications
 - Analytics dashboard
+- Pub visit date tracking
+- Location-based pub discovery
 
 ## Tech Stack
 
