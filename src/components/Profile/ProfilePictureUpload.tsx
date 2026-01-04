@@ -8,7 +8,21 @@ import {
   Image,
   Alert,
 } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
+
+// Lazy load ImagePicker to prevent app crash if native module is unavailable
+let ImagePicker: typeof import('expo-image-picker') | null = null;
+
+const loadImagePicker = async () => {
+  if (!ImagePicker) {
+    try {
+      ImagePicker = await import('expo-image-picker');
+    } catch (error) {
+      console.warn('Failed to load ImagePicker:', error);
+      throw new Error('Image picker not available');
+    }
+  }
+  return ImagePicker;
+};
 
 interface ProfilePictureUploadProps {
   currentImageUrl?: string;
@@ -26,12 +40,14 @@ export const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
   const [isUploading, setIsUploading] = useState(false);
 
   const requestCameraPermission = async () => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    const picker = await loadImagePicker();
+    const { status } = await picker!.requestCameraPermissionsAsync();
     return status === 'granted';
   };
 
   const requestMediaLibraryPermission = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const picker = await loadImagePicker();
+    const { status } = await picker!.requestMediaLibraryPermissionsAsync();
     return status === 'granted';
   };
 
@@ -43,7 +59,8 @@ export const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
     }
 
     try {
-      const result = await ImagePicker.launchCameraAsync({
+      const picker = await loadImagePicker();
+      const result = await picker!.launchCameraAsync({
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.8,
@@ -69,7 +86,8 @@ export const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
     }
 
     try {
-      const result = await ImagePicker.launchImageLibraryAsync({
+      const picker = await loadImagePicker();
+      const result = await picker!.launchImageLibraryAsync({
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.8,

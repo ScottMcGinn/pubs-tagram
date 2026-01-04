@@ -1,4 +1,3 @@
-import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
 
 export interface ImageResult {
@@ -7,10 +6,26 @@ export interface ImageResult {
   height: number;
 }
 
+// Lazy load ImagePicker to prevent app crash at startup
+let ImagePicker: typeof import('expo-image-picker') | null = null;
+
+const loadImagePicker = async () => {
+  if (!ImagePicker) {
+    try {
+      ImagePicker = await import('expo-image-picker');
+    } catch (error) {
+      console.warn('Failed to load ImagePicker:', error);
+      throw new Error('Image picker not available');
+    }
+  }
+  return ImagePicker;
+};
+
 // Pick image from camera
 export const pickImageFromCamera = async (): Promise<ImageResult | null> => {
-  const result = await ImagePicker.launchCameraAsync({
-    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+  const picker = await loadImagePicker();
+  const result = await picker!.launchCameraAsync({
+    mediaTypes: picker!.MediaTypeOptions.Images,
     aspect: [4, 3],
     quality: 0.8,
   });
@@ -29,8 +44,9 @@ export const pickImageFromCamera = async (): Promise<ImageResult | null> => {
 
 // Pick image from gallery
 export const pickImageFromGallery = async (): Promise<ImageResult | null> => {
-  const result = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+  const picker = await loadImagePicker();
+  const result = await picker!.launchImageLibraryAsync({
+    mediaTypes: picker!.MediaTypeOptions.Images,
     aspect: [4, 3],
     quality: 0.8,
   });
