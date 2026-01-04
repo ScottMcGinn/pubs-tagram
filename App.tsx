@@ -1,10 +1,23 @@
 import React from 'react';
+console.log('[App] Import 1: React loaded');
+
 import { NavigationContainer } from '@react-navigation/native';
+console.log('[App] Import 2: NavigationContainer loaded');
+
 import { StatusBar } from 'expo-status-bar';
+console.log('[App] Import 3: StatusBar loaded');
+
 import { AuthProvider } from './src/contexts/AuthContext';
+console.log('[App] Import 4: AuthProvider loaded');
+
 import { UserProvider } from './src/contexts/UserContext';
+console.log('[App] Import 5: UserProvider loaded');
+
 import AppNavigator from './src/navigation/AppNavigator';
+console.log('[App] Import 6: AppNavigator loaded');
+
 import { View, Text, ScrollView } from 'react-native';
+console.log('[App] Import 7: React Native components loaded');
 
 // Catch errors at module import time
 console.log('[App] App.tsx module loading');
