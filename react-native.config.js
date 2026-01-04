@@ -7,7 +7,7 @@ module.exports = {
     '@react-native-async-storage/async-storage': {
       platforms: {
         android: {
-          sourceDir: '../node_modules/@react-native-async-storage/async-storage/android',
+          sourceDir: './node_modules/@react-native-async-storage/async-storage/android',
         },
         ios: {},
       },
@@ -15,7 +15,7 @@ module.exports = {
     'react-native-gesture-handler': {
       platforms: {
         android: {
-          sourceDir: '../node_modules/react-native-gesture-handler/android',
+          sourceDir: './node_modules/react-native-gesture-handler/android',
         },
         ios: {},
       },
@@ -23,7 +23,7 @@ module.exports = {
     'react-native-safe-area-context': {
       platforms: {
         android: {
-          sourceDir: '../node_modules/react-native-safe-area-context/android',
+          sourceDir: './node_modules/react-native-safe-area-context/android',
         },
         ios: {},
       },
@@ -31,7 +31,7 @@ module.exports = {
     'react-native-screens': {
       platforms: {
         android: {
-          sourceDir: '../node_modules/react-native-screens/android',
+          sourceDir: './node_modules/react-native-screens/android',
         },
         ios: {},
       },
