@@ -1,5 +1,3 @@
-import { Timestamp } from 'firebase/firestore';
-
 // User types
 export interface User {
   userId: string;
@@ -16,8 +14,8 @@ export interface UserProfile {
   displayName: string;
   bio: string;
   profilePictureUrl?: string;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
+  createdAt: Date;
+  updatedAt: Date;
   isPublic: boolean;
   followers?: string[]; // Array of user IDs who follow this user
   following?: string[]; // Array of user IDs this user follows

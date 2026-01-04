@@ -21,9 +21,7 @@ import {
 import { ProfileHeader } from '../components/Profile/ProfileHeader';
 import { ProfilePictureUpload } from '../components/Profile/ProfilePictureUpload';
 import { ProfileEditForm } from '../components/Profile/ProfileEditForm';
-import { UserProfile } from '../types';
-import { Timestamp } from 'firebase/firestore';
-import { RootStackParamList } from '../types';
+import { UserProfile, RootStackParamList } from '../types';
 
 type ProfileScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -137,8 +135,8 @@ export const ProfileScreen: React.FC = () => {
     bio: '',
     profilePictureUrl: undefined,
     isPublic: true,
-    createdAt: Timestamp.now(),
-    updatedAt: Timestamp.now(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
 
   return (

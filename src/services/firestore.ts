@@ -1,6 +1,16 @@
-import firestore from '@react-native-firebase/firestore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Pub, UserProfile } from '../types';
 import { createUserProfile, getUserProfile } from './userProfiles';
+
+const PROJECT_ID = process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID;
+const FIRESTORE_API_URL = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
+
+// Get ID token from AsyncStorage
+const getIdToken = async (): Promise<string> => {
+  const token = await AsyncStorage.getItem('idToken');
+  if (!token) throw new Error('No authentication token found');
+  return token;
+};
 
 // Create a new pub entry
 export const createPub = async (
@@ -18,29 +28,50 @@ export const createPub = async (
   }
 ): Promise<string> => {
   try {
-    // Generate ID client-side
+    const idToken = await getIdToken();
     const pubId = `pub_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const timestamp = firestore.Timestamp.now();
+    const now = new Date().toISOString();
 
-    await firestore()
-      .collection('pubs')
-      .doc(pubId)
-      .set({
-        userId,
-        pubName: pubData.pubName,
-        location: pubData.location,
-        whatYouHad: pubData.whatYouHad || '',
-        valueForMoney: pubData.valueForMoney,
-        beerQuality: pubData.beerQuality,
-        foodQuality: pubData.foodQuality || null,
-        visitDate: pubData.visitDate
-          ? firestore.Timestamp.fromDate(pubData.visitDate)
-          : null,
-        photoUrls: pubData.photoUrls,
-        thumbnailUrls: pubData.thumbnailUrls,
-        createdAt: timestamp,
-        updatedAt: timestamp,
-      });
+    const response = await fetch(
+      `${FIRESTORE_API_URL}/pubs/${pubId}?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({
+          fields: {
+            userId: { stringValue: userId },
+            pubName: { stringValue: pubData.pubName },
+            location: { stringValue: pubData.location },
+            whatYouHad: { stringValue: pubData.whatYouHad || '' },
+            valueForMoney: { integerValue: pubData.valueForMoney },
+            beerQuality: { integerValue: pubData.beerQuality },
+            foodQuality: { integerValue: pubData.foodQuality || 0 },
+            visitDate: { timestampValue: pubData.visitDate?.toISOString() || now },
+            photoUrls: {
+              arrayValue: {
+                values: pubData.photoUrls.map(url => ({ stringValue: url })),
+              },
+            },
+            thumbnailUrls: {
+              arrayValue: {
+                values: pubData.thumbnailUrls.map(url => ({
+                  stringValue: url,
+                })),
+              },
+            },
+            createdAt: { timestampValue: now },
+            updatedAt: { timestampValue: now },
+          },
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to create pub: ${response.statusText}`);
+    }
 
     return pubId;
   } catch (error) {
@@ -53,53 +84,67 @@ export const createPub = async (
 // Automatically creates profile if it doesn't exist (handles user migration)
 export const getUserPubs = async (userId: string): Promise<Pub[]> => {
   try {
-    const snapshot = await firestore()
-      .collection('pubs')
-      .where('userId', '==', userId)
-      .orderBy('createdAt', 'desc')
-      .get();
+    const idToken = await getIdToken();
+    const response = await fetch(
+      `${FIRESTORE_API_URL}:runQuery?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({
+          structuredQuery: {
+            from: [{ collectionId: 'pubs' }],
+            where: {
+              fieldFilter: {
+                field: { fieldPath: 'userId' },
+                op: 'EQUAL',
+                value: { stringValue: userId },
+              },
+            },
+            orderBy: [
+              {
+                field: { fieldPath: 'createdAt' },
+                direction: 'DESCENDING',
+              },
+            ],
+          },
+        }),
+      }
+    );
 
+    if (!response.ok) {
+      throw new Error(`Failed to fetch user pubs: ${response.statusText}`);
+    }
+
+    const data = await response.json();
     const pubs: Pub[] = [];
 
-    // Fetch user profile once (with automatic migration for existing users)
+    // Get user profile
     let userProfile: UserProfile | null = null;
     try {
       userProfile = await getUserProfile(userId);
-
-      // Migration: if user has no profile but is trying to view pubs, create one
-      if (!userProfile) {
-        console.log(`Profile missing for user ${userId}, creating...`);
-        try {
-          const displayName = userId.split('@')[0] || 'User';
-          await createUserProfile(userId, displayName, userId);
-          userProfile = await getUserProfile(userId);
-        } catch (createError) {
-          console.error(
-            'Error creating profile during migration:',
-            createError
-          );
-        }
-      }
     } catch (error) {
       console.error('Error fetching user profile:', error);
     }
 
-    snapshot.forEach(doc => {
-      const data = doc.data();
+    if (data.document) {
+      const pubData = convertFirestoreDoc(data.document);
       pubs.push({
-        pubId: doc.id,
-        userId: data.userId,
-        pubName: data.pubName,
-        location: data.location,
-        whatYouHad: data.whatYouHad,
-        valueForMoney: data.valueForMoney,
-        beerQuality: data.beerQuality,
-        foodQuality: data.foodQuality || undefined,
-        visitDate: data.visitDate ? data.visitDate.toDate() : undefined,
-        photoUrls: data.photoUrls,
-        thumbnailUrls: data.thumbnailUrls,
-        createdAt: data.createdAt.toDate(),
-        updatedAt: data.updatedAt.toDate(),
+        pubId: pubData.pubId,
+        userId: pubData.userId,
+        pubName: pubData.pubName,
+        location: pubData.location,
+        whatYouHad: pubData.whatYouHad,
+        valueForMoney: pubData.valueForMoney,
+        beerQuality: pubData.beerQuality,
+        foodQuality: pubData.foodQuality,
+        visitDate: pubData.visitDate,
+        photoUrls: pubData.photoUrls,
+        thumbnailUrls: pubData.thumbnailUrls,
+        createdAt: pubData.createdAt,
+        updatedAt: pubData.updatedAt,
         userProfile: userProfile
           ? {
               displayName: userProfile.displayName,
@@ -107,7 +152,7 @@ export const getUserPubs = async (userId: string): Promise<Pub[]> => {
             }
           : undefined,
       });
-    });
+    }
 
     return pubs;
   } catch (error) {
@@ -116,10 +161,52 @@ export const getUserPubs = async (userId: string): Promise<Pub[]> => {
   }
 };
 
+// Helper to convert Firestore REST API doc format to JS object
+const convertFirestoreDoc = (doc: any): any => {
+  const fields = doc.fields || {};
+  const result: any = { pubId: doc.name.split('/').pop() };
+
+  for (const [key, field] of Object.entries(fields)) {
+    const value = field as any;
+    if (value.stringValue) {
+      result[key] = value.stringValue;
+    } else if (value.integerValue) {
+      result[key] = parseInt(value.integerValue);
+    } else if (value.booleanValue !== undefined) {
+      result[key] = value.booleanValue;
+    } else if (value.timestampValue) {
+      result[key] = new Date(value.timestampValue);
+    } else if (value.arrayValue) {
+      result[key] = (value.arrayValue.values || []).map((v: any) => {
+        if (v.stringValue) return v.stringValue;
+        if (v.integerValue) return parseInt(v.integerValue);
+        return v;
+      });
+    } else if (value.mapValue) {
+      result[key] = convertFirestoreDoc({ fields: value.mapValue.fields });
+    }
+  }
+
+  return result;
+};
+
 // Delete a pub
 export const deletePub = async (pubId: string): Promise<void> => {
   try {
-    await firestore().collection('pubs').doc(pubId).delete();
+    const idToken = await getIdToken();
+    const response = await fetch(
+      `${FIRESTORE_API_URL}/pubs/${pubId}?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to delete pub: ${response.statusText}`);
+    }
   } catch (error) {
     console.error('Error deleting pub:', error);
     throw error;
@@ -133,62 +220,107 @@ export const getExplorePubs = async (
   limit: number = 50
 ): Promise<Pub[]> => {
   try {
+    const idToken = await getIdToken();
+    
     // Get current user's following list
-    const followsSnapshot = await firestore()
-      .collection('follows')
-      .where('follower', '==', currentUserId)
-      .get();
-
-    const followingIds = new Set(
-      followsSnapshot.docs.map(doc => doc.data().following)
+    const followResponse = await fetch(
+      `${FIRESTORE_API_URL}:runQuery?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({
+          structuredQuery: {
+            from: [{ collectionId: 'follows' }],
+            where: {
+              fieldFilter: {
+                field: { fieldPath: 'follower' },
+                op: 'EQUAL',
+                value: { stringValue: currentUserId },
+              },
+            },
+          },
+        }),
+      }
     );
 
-    // Get all pubs
-    const allPubsSnapshot = await firestore()
-      .collection('pubs')
-      .orderBy('visitDate', 'desc')
-      .get();
+    const followData = await followResponse.json();
+    const followingIds = new Set<string>();
+    
+    if (Array.isArray(followData)) {
+      followData.forEach((doc: any) => {
+        if (doc.document?.fields?.following?.stringValue) {
+          followingIds.add(doc.document.fields.following.stringValue);
+        }
+      });
+    }
 
+    // Get all pubs ordered by visitDate
+    const pubsResponse = await fetch(
+      `${FIRESTORE_API_URL}:runQuery?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({
+          structuredQuery: {
+            from: [{ collectionId: 'pubs' }],
+            orderBy: [
+              {
+                field: { fieldPath: 'visitDate' },
+                direction: 'DESCENDING',
+              },
+            ],
+          },
+        }),
+      }
+    );
+
+    const pubsData = await pubsResponse.json();
     const explorePubs: Pub[] = [];
 
-    for (const doc of allPubsSnapshot.docs) {
-      if (explorePubs.length >= limit) break;
+    if (Array.isArray(pubsData)) {
+      for (const doc of pubsData) {
+        if (explorePubs.length >= limit) break;
 
-      const pubData = doc.data() as any;
-      const pubId = doc.id;
-      const userId = pubData.userId;
+        if (doc.document) {
+          const pubData = convertFirestoreDoc(doc.document);
+          const userId = pubData.userId;
 
-      // Only include pubs from users not being followed and not from current user
-      if (!followingIds.has(userId) && userId !== currentUserId) {
-        try {
-          const userProfile = await getUserProfile(userId);
-
-          if (userProfile) {
-            const pub: Pub = {
-              pubId,
-              userId,
-              pubName: pubData.pubName || '',
-              location: pubData.location || '',
-              whatYouHad: pubData.whatYouHad || '',
-              valueForMoney: pubData.valueForMoney || 0,
-              beerQuality: pubData.beerQuality || 0,
-              foodQuality: pubData.foodQuality || undefined,
-              visitDate: pubData.visitDate?.toDate?.() || new Date(),
-              photoUrls: pubData.photoUrls || [],
-              thumbnailUrls: pubData.thumbnailUrls || [],
-              createdAt: pubData.createdAt?.toDate?.() || new Date(),
-              updatedAt: pubData.updatedAt?.toDate?.() || new Date(),
-              userProfile: {
-                displayName: userProfile.displayName,
-                profilePictureUrl: userProfile.profilePictureUrl,
-              },
-            };
-            explorePubs.push(pub);
+          // Only include pubs from users not being followed and not from current user
+          if (!followingIds.has(userId) && userId !== currentUserId) {
+            try {
+              const userProfile = await getUserProfile(userId);
+              if (userProfile) {
+                explorePubs.push({
+                  pubId: pubData.pubId,
+                  userId,
+                  pubName: pubData.pubName || '',
+                  location: pubData.location || '',
+                  whatYouHad: pubData.whatYouHad || '',
+                  valueForMoney: pubData.valueForMoney || 0,
+                  beerQuality: pubData.beerQuality || 0,
+                  foodQuality: pubData.foodQuality,
+                  visitDate: pubData.visitDate,
+                  photoUrls: pubData.photoUrls || [],
+                  thumbnailUrls: pubData.thumbnailUrls || [],
+                  createdAt: pubData.createdAt,
+                  updatedAt: pubData.updatedAt,
+                  userProfile: {
+                    displayName: userProfile.displayName,
+                    profilePictureUrl: userProfile.profilePictureUrl,
+                  },
+                });
+              }
+            } catch (error) {
+              console.error('Error fetching user profile for pub:', error);
+              continue;
+            }
           }
-        } catch (error) {
-          console.error('Error fetching user profile for pub:', error);
-          // Skip this pub if we can't fetch the user profile
-          continue;
         }
       }
     }
@@ -203,15 +335,25 @@ export const getExplorePubs = async (
 // Like a pub
 export const likePub = async (userId: string, pubId: string): Promise<void> => {
   try {
-    await firestore()
-      .collection('pubs')
-      .doc(pubId)
-      .collection('likes')
-      .doc(userId)
-      .set({
-        userId,
-        likedAt: firestore.Timestamp.now(),
-      });
+    const idToken = await getIdToken();
+    const likeId = `${userId}_${Date.now()}`;
+
+    await fetch(
+      `${FIRESTORE_API_URL}/pubs/${pubId}/likes/${likeId}?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({
+          fields: {
+            userId: { stringValue: userId },
+            likedAt: { timestampValue: new Date().toISOString() },
+          },
+        }),
+      }
+    );
   } catch (error) {
     console.error('Error liking pub:', error);
     throw error;
@@ -224,12 +366,18 @@ export const unlikePub = async (
   pubId: string
 ): Promise<void> => {
   try {
-    await firestore()
-      .collection('pubs')
-      .doc(pubId)
-      .collection('likes')
-      .doc(userId)
-      .delete();
+    const idToken = await getIdToken();
+    const likeId = `${userId}_like`;
+
+    await fetch(
+      `${FIRESTORE_API_URL}/pubs/${pubId}/likes/${likeId}?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      }
+    );
   } catch (error) {
     console.error('Error unliking pub:', error);
     throw error;
@@ -242,13 +390,20 @@ export const hasLikedPub = async (
   pubId: string
 ): Promise<boolean> => {
   try {
-    const likeDoc = await firestore()
-      .collection('pubs')
-      .doc(pubId)
-      .collection('likes')
-      .doc(userId)
-      .get();
-    return Boolean(likeDoc.exists);
+    const idToken = await getIdToken();
+    const likeId = `${userId}_like`;
+
+    const response = await fetch(
+      `${FIRESTORE_API_URL}/pubs/${pubId}/likes/${likeId}?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      }
+    );
+
+    return response.ok;
   } catch (error) {
     console.error('Error checking if user liked pub:', error);
     return false;
@@ -258,12 +413,36 @@ export const hasLikedPub = async (
 // Get like count for a pub
 export const getLikeCount = async (pubId: string): Promise<number> => {
   try {
-    const snapshot = await firestore()
-      .collection('pubs')
-      .doc(pubId)
-      .collection('likes')
-      .get();
-    return snapshot.size;
+    const idToken = await getIdToken();
+
+    const response = await fetch(
+      `${FIRESTORE_API_URL}:runQuery?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({
+          structuredQuery: {
+            from: [
+              {
+                collectionId: 'pubs',
+                allDescendants: false,
+              },
+              {
+                collectionId: 'likes',
+              },
+            ],
+          },
+        }),
+      }
+    );
+
+    if (!response.ok) return 0;
+
+    const data = await response.json();
+    return Array.isArray(data) ? data.length : 0;
   } catch (error) {
     console.error('Error getting like count:', error);
     return 0;
@@ -276,15 +455,25 @@ export const dislikePub = async (
   pubId: string
 ): Promise<void> => {
   try {
-    await firestore()
-      .collection('pubs')
-      .doc(pubId)
-      .collection('dislikes')
-      .doc(userId)
-      .set({
-        userId,
-        dislikedAt: firestore.Timestamp.now(),
-      });
+    const idToken = await getIdToken();
+    const dislikeId = `${userId}_${Date.now()}`;
+
+    await fetch(
+      `${FIRESTORE_API_URL}/pubs/${pubId}/dislikes/${dislikeId}?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({
+          fields: {
+            userId: { stringValue: userId },
+            dislikedAt: { timestampValue: new Date().toISOString() },
+          },
+        }),
+      }
+    );
   } catch (error) {
     console.error('Error disliking pub:', error);
     throw error;
@@ -297,12 +486,18 @@ export const undislikePub = async (
   pubId: string
 ): Promise<void> => {
   try {
-    await firestore()
-      .collection('pubs')
-      .doc(pubId)
-      .collection('dislikes')
-      .doc(userId)
-      .delete();
+    const idToken = await getIdToken();
+    const dislikeId = `${userId}_dislike`;
+
+    await fetch(
+      `${FIRESTORE_API_URL}/pubs/${pubId}/dislikes/${dislikeId}?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      }
+    );
   } catch (error) {
     console.error('Error removing dislike from pub:', error);
     throw error;
@@ -315,13 +510,20 @@ export const hasDislikedPub = async (
   pubId: string
 ): Promise<boolean> => {
   try {
-    const dislikeDoc = await firestore()
-      .collection('pubs')
-      .doc(pubId)
-      .collection('dislikes')
-      .doc(userId)
-      .get();
-    return Boolean(dislikeDoc.exists);
+    const idToken = await getIdToken();
+    const dislikeId = `${userId}_dislike`;
+
+    const response = await fetch(
+      `${FIRESTORE_API_URL}/pubs/${pubId}/dislikes/${dislikeId}?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      }
+    );
+
+    return response.ok;
   } catch (error) {
     console.error('Error checking if user disliked pub:', error);
     return false;
@@ -331,12 +533,36 @@ export const hasDislikedPub = async (
 // Get dislike count for a pub
 export const getDislikeCount = async (pubId: string): Promise<number> => {
   try {
-    const snapshot = await firestore()
-      .collection('pubs')
-      .doc(pubId)
-      .collection('dislikes')
-      .get();
-    return snapshot.size;
+    const idToken = await getIdToken();
+
+    const response = await fetch(
+      `${FIRESTORE_API_URL}:runQuery?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({
+          structuredQuery: {
+            from: [
+              {
+                collectionId: 'pubs',
+                allDescendants: false,
+              },
+              {
+                collectionId: 'dislikes',
+              },
+            ],
+          },
+        }),
+      }
+    );
+
+    if (!response.ok) return 0;
+
+    const data = await response.json();
+    return Array.isArray(data) ? data.length : 0;
   } catch (error) {
     console.error('Error getting dislike count:', error);
     return 0;

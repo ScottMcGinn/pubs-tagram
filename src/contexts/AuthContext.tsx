@@ -1,14 +1,19 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createUserProfile } from '../services/userProfiles';
 
-console.log(
-  '[AuthContext] Module loading - React Native Firebase auth available:',
-  !!auth
-);
+const FIREBASE_API_KEY = process.env.EXPO_PUBLIC_FIREBASE_API_KEY;
+const AUTH_URL = 'https://identitytoolkit.googleapis.com/v1/accounts';
+
+export interface AuthUser {
+  uid: string;
+  email: string;
+  displayName: string | null;
+  idToken: string;
+}
 
 interface AuthContextType {
-  user: FirebaseAuthTypes.User | null;
+  user: AuthUser | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (
@@ -32,53 +37,63 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Restore auth state from AsyncStorage on app load
   useEffect(() => {
-    let isMounted = true;
-    let timeoutId: NodeJS.Timeout;
-
-    // Set a timeout to force loading to false after 15 seconds as a fallback
-    timeoutId = setTimeout(() => {
-      if (isMounted) {
-        console.warn('[AuthContext] Auth check timed out - forcing completion');
-        setLoading(false);
-      }
-    }, 15000);
-
-    try {
-      console.log('[AuthContext] Setting up onAuthStateChanged listener');
-      const unsubscribe = auth().onAuthStateChanged(userState => {
-        if (isMounted) {
-          console.log('[AuthContext] Auth state changed:', !!userState);
-          setUser(userState);
-          setLoading(false);
-          clearTimeout(timeoutId);
+    const restoreAuth = async () => {
+      try {
+        const storedUser = await AsyncStorage.getItem('authUser');
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
         }
-      });
-
-      return () => {
-        isMounted = false;
-        clearTimeout(timeoutId);
-        unsubscribe();
-      };
-    } catch (error) {
-      console.error('[AuthContext] Auth listener setup error:', error);
-      if (isMounted) {
+      } catch (error) {
+        console.error('[AuthContext] Error restoring auth:', error);
+      } finally {
         setLoading(false);
-        clearTimeout(timeoutId);
       }
-    }
+    };
+
+    restoreAuth();
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    console.log('[AuthContext] signIn attempt for:', email);
     try {
-      await auth().signInWithEmailAndPassword(email, password);
-      console.log('[AuthContext] signIn successful');
-    } catch (error: any) {
-      console.error('[AuthContext] signIn error:', error?.message);
+      // Sign in via Firebase Auth REST API
+      const signInResponse = await fetch(
+        `${AUTH_URL}:signInWithPassword?key=${FIREBASE_API_KEY}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email,
+            password,
+            returnSecureToken: true,
+          }),
+        }
+      );
+
+      if (!signInResponse.ok) {
+        const error = await signInResponse.json();
+        throw new Error(error.error?.message || 'Sign in failed');
+      }
+
+      const signInData = await signInResponse.json();
+      const { localId: uid, idToken, displayName } = signInData;
+
+      const authUser: AuthUser = {
+        uid,
+        email,
+        displayName: displayName || null,
+        idToken,
+      };
+
+      setUser(authUser);
+      await AsyncStorage.setItem('authUser', JSON.stringify(authUser));
+      await AsyncStorage.setItem('idToken', idToken);
+    } catch (error) {
+      console.error('[AuthContext] Sign in error:', error);
       throw error;
     }
   };
@@ -88,29 +103,60 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     password: string,
     displayName: string
   ) => {
-    console.log('[AuthContext] signUp attempt for:', email);
     try {
-      const result = await auth().createUserWithEmailAndPassword(
-        email,
-        password
+      // Create user account via Firebase Auth REST API
+      const signUpResponse = await fetch(
+        `${AUTH_URL}:signUp?key=${FIREBASE_API_KEY}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email,
+            password,
+            returnSecureToken: true,
+          }),
+        }
       );
-      console.log('[AuthContext] signUp successful, creating profile');
-      // Create user profile after successful sign up with chosen display name
-      await createUserProfile(result.user.uid, displayName, email);
-      console.log('[AuthContext] User profile created');
-    } catch (error: any) {
-      console.error('[AuthContext] signUp error:', error?.message);
+
+      if (!signUpResponse.ok) {
+        const error = await signUpResponse.json();
+        throw new Error(error.error?.message || 'Sign up failed');
+      }
+
+      const signUpData = await signUpResponse.json();
+      const { localId: uid, idToken } = signUpData;
+
+      // Create user profile in Firestore
+      await createUserProfile(uid, {
+        email,
+        displayName,
+        photoUrl: null,
+        createdAt: new Date(),
+      });
+
+      const authUser: AuthUser = {
+        uid,
+        email,
+        displayName,
+        idToken,
+      };
+
+      setUser(authUser);
+      await AsyncStorage.setItem('authUser', JSON.stringify(authUser));
+      await AsyncStorage.setItem('idToken', idToken);
+    } catch (error) {
+      console.error('[AuthContext] Sign up error:', error);
       throw error;
     }
   };
 
   const signOut = async () => {
-    console.log('[AuthContext] signOut attempt');
     try {
-      await auth().signOut();
-      console.log('[AuthContext] signOut successful');
-    } catch (error: any) {
-      console.error('[AuthContext] signOut error:', error?.message);
+      setUser(null);
+      await AsyncStorage.removeItem('authUser');
+      await AsyncStorage.removeItem('idToken');
+    } catch (error) {
+      console.error('[AuthContext] Sign out error:', error);
       throw error;
     }
   };

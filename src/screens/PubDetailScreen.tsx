@@ -31,7 +31,6 @@ import {
   getDislikeCount,
 } from '../services/firestore';
 import { useAuth } from '../contexts/AuthContext';
-import storage from '@react-native-firebase/storage';
 
 type PubDetailRouteProp = RouteProp<RootStackParamList, 'PubDetail'>;
 type PubDetailNavigationProp = StackNavigationProp<
@@ -155,40 +154,6 @@ const PubDetailScreen = () => {
 
     try {
       console.log('Starting delete for pub:', pub.pubId);
-
-      // Delete photos from Storage
-      const deletePhotoPromises = pub.photoUrls.map(async (url: string) => {
-        try {
-          const urlObj = new URL(url);
-          const path = decodeURIComponent(
-            urlObj.pathname.split('/o/')[1].split('?')[0]
-          );
-          console.log('Deleting photo:', path);
-          const photoRef = storage().ref(path);
-          await photoRef.delete();
-        } catch (error) {
-          console.error('Error deleting photo:', error);
-        }
-      });
-
-      const deleteThumbnailPromises = pub.thumbnailUrls.map(
-        async (url: string) => {
-          try {
-            const urlObj = new URL(url);
-            const path = decodeURIComponent(
-              urlObj.pathname.split('/o/')[1].split('?')[0]
-            );
-            console.log('Deleting thumbnail:', path);
-            const thumbRef = storage().ref(path);
-            await thumbRef.delete();
-          } catch (error) {
-            console.error('Error deleting thumbnail:', error);
-          }
-        }
-      );
-
-      await Promise.all([...deletePhotoPromises, ...deleteThumbnailPromises]);
-      console.log('Photos deleted');
 
       // Delete Firestore document
       await deletePub(pub.pubId);

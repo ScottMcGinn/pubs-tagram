@@ -1,33 +1,90 @@
-import firestore from '@react-native-firebase/firestore';
-import storage from '@react-native-firebase/storage';
-import RNFS from 'react-native-fs';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { UserProfile } from '../types';
+
+const PROJECT_ID = process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID;
+const FIRESTORE_API_URL = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
+
+// Get ID token from AsyncStorage
+const getIdToken = async (): Promise<string> => {
+  const token = await AsyncStorage.getItem('idToken');
+  if (!token) throw new Error('No authentication token found');
+  return token;
+};
 
 /**
  * Create a new user profile
  */
 export const createUserProfile = async (
   uid: string,
-  displayName: string,
-  email: string
+  displayName: string | { email: string; displayName: string; photoUrl: null; createdAt: Date },
+  email?: string
 ): Promise<UserProfile> => {
-  const timestamp = firestore.Timestamp.now();
+  try {
+    const idToken = await getIdToken();
+    
+    // Handle both old and new call signatures
+    let profileDisplayName = '';
+    let profileEmail = '';
+    let profilePhotoUrl = null;
 
-  const profileData: any = {
-    uid,
-    email,
-    displayName,
-    bio: '',
-    createdAt: timestamp,
-    updatedAt: timestamp,
-    isPublic: true,
-    followers: [],
-    following: [],
-    // Don't include profilePictureUrl if undefined - Firestore rejects undefined values
-  };
+    if (typeof displayName === 'string' && email) {
+      profileDisplayName = displayName;
+      profileEmail = email;
+    } else if (typeof displayName === 'object') {
+      profileEmail = displayName.email;
+      profileDisplayName = displayName.displayName;
+      profilePhotoUrl = displayName.photoUrl;
+    }
 
-  await firestore().collection('users').doc(uid).set(profileData);
-  return profileData as UserProfile;
+    const now = new Date().toISOString();
+
+    const response = await fetch(
+      `${FIRESTORE_API_URL}/users/${uid}?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({
+          fields: {
+            uid: { stringValue: uid },
+            email: { stringValue: profileEmail },
+            displayName: { stringValue: profileDisplayName },
+            bio: { stringValue: '' },
+            createdAt: { timestampValue: now },
+            updatedAt: { timestampValue: now },
+            isPublic: { booleanValue: true },
+            followers: { arrayValue: { values: [] } },
+            following: { arrayValue: { values: [] } },
+            ...(() => profilePhotoUrl ? {
+              profilePictureUrl: { stringValue: profilePhotoUrl },
+            } : {})(),
+          },
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to create user profile: ${response.statusText}`);
+    }
+
+    return {
+      uid,
+      email: profileEmail,
+      displayName: profileDisplayName,
+      bio: '',
+      profilePictureUrl: profilePhotoUrl || undefined,
+      createdAt: new Date(now),
+      updatedAt: new Date(now),
+      isPublic: true,
+      followers: [],
+      following: [],
+    } as UserProfile;
+  } catch (error) {
+    console.error('Error creating user profile:', error);
+    throw error;
+  }
 };
 
 /**
@@ -37,16 +94,48 @@ export const getUserProfile = async (
   uid: string
 ): Promise<UserProfile | null> => {
   try {
-    const userSnap = await firestore().collection('users').doc(uid).get();
+    const idToken = await getIdToken();
 
-    if (!userSnap.exists) {
+    const response = await fetch(
+      `${FIRESTORE_API_URL}/users/${uid}?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
       return null;
     }
 
-    return userSnap.data() as UserProfile;
+    const data = await response.json();
+    const fields = data.fields || {};
+
+    return {
+      uid,
+      email: fields.email?.stringValue || '',
+      displayName: fields.displayName?.stringValue || '',
+      bio: fields.bio?.stringValue || '',
+      profilePictureUrl: fields.profilePictureUrl?.stringValue || undefined,
+      createdAt: fields.createdAt?.timestampValue
+        ? new Date(fields.createdAt.timestampValue)
+        : new Date(),
+      updatedAt: fields.updatedAt?.timestampValue
+        ? new Date(fields.updatedAt.timestampValue)
+        : new Date(),
+      isPublic: fields.isPublic?.booleanValue ?? true,
+      followers: (fields.followers?.arrayValue?.values || []).map(
+        (v: any) => v.stringValue
+      ),
+      following: (fields.following?.arrayValue?.values || []).map(
+        (v: any) => v.stringValue
+      ),
+    } as UserProfile;
   } catch (error) {
     console.error('Error getting user profile:', error);
-    throw error;
+    return null;
   }
 };
 
@@ -67,13 +156,42 @@ export const updateUserProfile = async (
   updates: Partial<Omit<UserProfile, 'uid' | 'email' | 'createdAt'>>
 ): Promise<void> => {
   try {
-    await firestore()
-      .collection('users')
-      .doc(uid)
-      .update({
-        ...updates,
-        updatedAt: firestore.Timestamp.now(),
-      });
+    const idToken = await getIdToken();
+    const now = new Date().toISOString();
+
+    const updateFields: any = {
+      updatedAt: { timestampValue: now },
+    };
+
+    // Convert updates to Firestore format
+    if (updates.displayName) {
+      updateFields.displayName = { stringValue: updates.displayName };
+    }
+    if (updates.bio !== undefined) {
+      updateFields.bio = { stringValue: updates.bio };
+    }
+    if (updates.profilePictureUrl !== undefined) {
+      updateFields.profilePictureUrl = {
+        stringValue: updates.profilePictureUrl || '',
+      };
+    }
+    if (updates.isPublic !== undefined) {
+      updateFields.isPublic = { booleanValue: updates.isPublic };
+    }
+
+    await fetch(
+      `${FIRESTORE_API_URL}/users/${uid}?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({
+          fields: updateFields,
+        }),
+      }
+    );
   } catch (error) {
     console.error('Error updating user profile:', error);
     throw error;
@@ -81,37 +199,16 @@ export const updateUserProfile = async (
 };
 
 /**
- * Upload profile picture to Firebase Storage
+ * Upload profile picture to Firebase Storage (mock for now)
  */
 export const uploadProfilePicture = async (
   uid: string,
   fileUri: string
 ): Promise<string> => {
   try {
-    // First ensure profile document exists
-    const profileSnap = await firestore().collection('users').doc(uid).get();
-
-    if (!profileSnap.exists) {
-      // Create profile if it doesn't exist
-      const timestamp = firestore.Timestamp.now();
-      await firestore().collection('users').doc(uid).set({
-        uid,
-        email: '',
-        displayName: 'User',
-        bio: '',
-        profilePictureUrl: fileUri,
-        isPublic: true,
-        createdAt: timestamp,
-        updatedAt: timestamp,
-      });
-    } else {
-      // Update existing profile
-      await updateUserProfile(uid, {
-        profilePictureUrl: fileUri,
-      });
-    }
-
-    return fileUri;
+    // TODO: Implement actual file upload when image handling is ready
+    const mockUrl = `gs://${process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET}/users/${uid}/profile-picture.jpg`;
+    return mockUrl;
   } catch (error) {
     console.error('Error uploading profile picture:', error);
     throw error;
@@ -123,10 +220,7 @@ export const uploadProfilePicture = async (
  */
 export const deleteProfilePicture = async (uid: string): Promise<void> => {
   try {
-    const storageRef = storage().ref(`profiles/${uid}/profile.jpg`);
-    await storageRef.delete();
-
-    // Update profile to remove picture URL
+    // TODO: Implement actual file deletion
     await updateUserProfile(uid, {
       profilePictureUrl: undefined,
     });
@@ -138,11 +232,6 @@ export const deleteProfilePicture = async (uid: string): Promise<void> => {
 
 /**
  * Search users by display name
- *
- * @param searchTerm - The search term to filter by displayName
- * @param limit - Maximum number of results to return
- * @param blockedUserIds - Optional array of user IDs to exclude from results (for future blocking feature)
- * @param excludePrivate - Optional flag to exclude private profiles (for future privacy feature)
  */
 export const searchUsers = async (
   searchTerm: string,
@@ -151,26 +240,45 @@ export const searchUsers = async (
   excludePrivate: boolean = false
 ): Promise<UserProfile[]> => {
   try {
-    // Fetch all users (no privacy filter since all authenticated users can see all profiles)
-    // Note: In production with large user bases, consider using Algolia or similar
-    const snapshot = await firestore().collection('users').get();
-    const users = snapshot.docs.map(doc => doc.data() as UserProfile);
+    const idToken = await getIdToken();
 
-    // Client-side filtering with support for future features
-    return users
-      .filter(user => {
-        // Exclude blocked users
-        if (blockedUserIds.includes(user.uid)) return false;
+    const response = await fetch(
+      `${FIRESTORE_API_URL}:runQuery?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({
+          structuredQuery: {
+            from: [{ collectionId: 'users' }],
+          },
+        }),
+      }
+    );
 
-        // Exclude private profiles if requested (future feature)
-        if (excludePrivate && user.isPublic === false) return false;
+    if (!response.ok) return [];
 
-        // Match search term
-        return user.displayName
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase());
-      })
-      .slice(0, limit);
+    const data = await response.json();
+    const users: UserProfile[] = [];
+
+    if (Array.isArray(data)) {
+      data.forEach((doc: any) => {
+        if (doc.document) {
+          const user = convertFirestoreDoc(doc.document) as UserProfile;
+          if (
+            !blockedUserIds.includes(user.uid) &&
+            (!excludePrivate || user.isPublic) &&
+            user.displayName.toLowerCase().includes(searchTerm.toLowerCase())
+          ) {
+            users.push(user);
+          }
+        }
+      });
+    }
+
+    return users.slice(0, limit);
   } catch (error) {
     console.error('Error searching users:', error);
     throw error;
@@ -182,8 +290,8 @@ export const searchUsers = async (
  */
 export const userProfileExists = async (uid: string): Promise<boolean> => {
   try {
-    const userSnap = await firestore().collection('users').doc(uid).get();
-    return Boolean(userSnap.exists);
+    const profile = await getUserProfile(uid);
+    return !!profile;
   } catch (error) {
     console.error('Error checking user profile:', error);
     return false;
@@ -192,10 +300,6 @@ export const userProfileExists = async (uid: string): Promise<boolean> => {
 
 /**
  * Get all discoverable profiles (for discovery) - paginated
- *
- * @param limit - Maximum number of profiles to return
- * @param blockedUserIds - Optional array of user IDs to exclude from results (for future blocking feature)
- * @param excludePrivate - Optional flag to exclude private profiles (for future privacy feature)
  */
 export const getPublicProfiles = async (
   limit: number = 20,
@@ -203,29 +307,57 @@ export const getPublicProfiles = async (
   excludePrivate: boolean = false
 ): Promise<UserProfile[]> => {
   try {
-    // Fetch all users (no privacy filter since all authenticated users can see all profiles)
-    const snapshot = await firestore()
-      .collection('users')
-      .where('isPublic', '==', true)
-      .get();
+    const idToken = await getIdToken();
 
-    return snapshot.docs
-      .map(doc => doc.data() as UserProfile)
-      .filter(user => {
-        // Exclude blocked users
-        if (blockedUserIds.includes(user.uid)) return false;
+    const response = await fetch(
+      `${FIRESTORE_API_URL}:runQuery?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({
+          structuredQuery: {
+            from: [{ collectionId: 'users' }],
+            where: {
+              fieldFilter: {
+                field: { fieldPath: 'isPublic' },
+                op: 'EQUAL',
+                value: { booleanValue: true },
+              },
+            },
+          },
+        }),
+      }
+    );
 
-        // Exclude private profiles if requested (future feature)
-        if (excludePrivate && user.isPublic === false) return false;
+    if (!response.ok) return [];
 
-        return true;
-      })
-      .slice(0, limit);
+    const data = await response.json();
+    const users: UserProfile[] = [];
+
+    if (Array.isArray(data)) {
+      data.forEach((doc: any) => {
+        if (doc.document) {
+          const user = convertFirestoreDoc(doc.document) as UserProfile;
+          if (
+            !blockedUserIds.includes(user.uid) &&
+            (!excludePrivate || user.isPublic)
+          ) {
+            users.push(user);
+          }
+        }
+      });
+    }
+
+    return users.slice(0, limit);
   } catch (error) {
-    console.error('Error getting discoverable profiles:', error);
-    throw error;
+    console.error('Error getting public profiles:', error);
+    return [];
   }
 };
+
 /**
  * Follow a user - creates a document in the follows collection
  */
@@ -234,12 +366,26 @@ export const followUser = async (
   targetUserId: string
 ): Promise<void> => {
   try {
-    // Create a document in the follows collection
-    await firestore().collection('follows').add({
-      follower: currentUserId,
-      following: targetUserId,
-      createdAt: firestore.Timestamp.now(),
-    });
+    const idToken = await getIdToken();
+    const followId = `${currentUserId}_${targetUserId}`;
+
+    await fetch(
+      `${FIRESTORE_API_URL}/follows/${followId}?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({
+          fields: {
+            follower: { stringValue: currentUserId },
+            following: { stringValue: targetUserId },
+            createdAt: { timestampValue: new Date().toISOString() },
+          },
+        }),
+      }
+    );
   } catch (error) {
     console.error('Error following user:', error);
     throw error;
@@ -247,23 +393,25 @@ export const followUser = async (
 };
 
 /**
- * Unfollow a user - deletes the follow document
+ * Unfollow a user
  */
 export const unfollowUser = async (
   currentUserId: string,
   targetUserId: string
 ): Promise<void> => {
   try {
-    // Find and delete the follow relationship
-    const snapshot = await firestore()
-      .collection('follows')
-      .where('follower', '==', currentUserId)
-      .where('following', '==', targetUserId)
-      .get();
+    const idToken = await getIdToken();
+    const followId = `${currentUserId}_${targetUserId}`;
 
-    for (const doc of snapshot.docs) {
-      await doc.ref.delete();
-    }
+    await fetch(
+      `${FIRESTORE_API_URL}/follows/${followId}?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      }
+    );
   } catch (error) {
     console.error('Error unfollowing user:', error);
     throw error;
@@ -278,13 +426,20 @@ export const isFollowing = async (
   targetUserId: string
 ): Promise<boolean> => {
   try {
-    const snapshot = await firestore()
-      .collection('follows')
-      .where('follower', '==', currentUserId)
-      .where('following', '==', targetUserId)
-      .get();
+    const idToken = await getIdToken();
+    const followId = `${currentUserId}_${targetUserId}`;
 
-    return snapshot.docs.length > 0;
+    const response = await fetch(
+      `${FIRESTORE_API_URL}/follows/${followId}?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      }
+    );
+
+    return response.ok;
   } catch (error) {
     console.error('Error checking follow status:', error);
     return false;
@@ -296,12 +451,35 @@ export const isFollowing = async (
  */
 export const getFollowersCount = async (userId: string): Promise<number> => {
   try {
-    const snapshot = await firestore()
-      .collection('follows')
-      .where('following', '==', userId)
-      .get();
+    const idToken = await getIdToken();
 
-    return snapshot.docs.length;
+    const response = await fetch(
+      `${FIRESTORE_API_URL}:runQuery?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({
+          structuredQuery: {
+            from: [{ collectionId: 'follows' }],
+            where: {
+              fieldFilter: {
+                field: { fieldPath: 'following' },
+                op: 'EQUAL',
+                value: { stringValue: userId },
+              },
+            },
+          },
+        }),
+      }
+    );
+
+    if (!response.ok) return 0;
+
+    const data = await response.json();
+    return Array.isArray(data) ? data.length : 0;
   } catch (error) {
     console.error('Error getting followers count:', error);
     return 0;
@@ -313,12 +491,35 @@ export const getFollowersCount = async (userId: string): Promise<number> => {
  */
 export const getFollowingCount = async (userId: string): Promise<number> => {
   try {
-    const snapshot = await firestore()
-      .collection('follows')
-      .where('follower', '==', userId)
-      .get();
+    const idToken = await getIdToken();
 
-    return snapshot.docs.length;
+    const response = await fetch(
+      `${FIRESTORE_API_URL}:runQuery?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({
+          structuredQuery: {
+            from: [{ collectionId: 'follows' }],
+            where: {
+              fieldFilter: {
+                field: { fieldPath: 'follower' },
+                op: 'EQUAL',
+                value: { stringValue: userId },
+              },
+            },
+          },
+        }),
+      }
+    );
+
+    if (!response.ok) return 0;
+
+    const data = await response.json();
+    return Array.isArray(data) ? data.length : 0;
   } catch (error) {
     console.error('Error getting following count:', error);
     return 0;
@@ -332,19 +533,44 @@ export const getFollowersList = async (
   userId: string
 ): Promise<UserProfile[]> => {
   try {
-    const snapshot = await firestore()
-      .collection('follows')
-      .where('following', '==', userId)
-      .get();
+    const idToken = await getIdToken();
 
-    const followerIds = snapshot.docs.map(doc => doc.data().follower);
+    const response = await fetch(
+      `${FIRESTORE_API_URL}:runQuery?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({
+          structuredQuery: {
+            from: [{ collectionId: 'follows' }],
+            where: {
+              fieldFilter: {
+                field: { fieldPath: 'following' },
+                op: 'EQUAL',
+                value: { stringValue: userId },
+              },
+            },
+          },
+        }),
+      }
+    );
 
-    // Fetch user profiles for all followers
+    if (!response.ok) return [];
+
+    const data = await response.json();
     const profiles: UserProfile[] = [];
-    for (const followerId of followerIds) {
-      const profile = await getUserProfile(followerId);
-      if (profile) {
-        profiles.push(profile);
+
+    if (Array.isArray(data)) {
+      for (const doc of data) {
+        if (doc.document?.fields?.follower?.stringValue) {
+          const profile = await getUserProfile(doc.document.fields.follower.stringValue);
+          if (profile) {
+            profiles.push(profile);
+          }
+        }
       }
     }
 
@@ -362,19 +588,44 @@ export const getFollowingList = async (
   userId: string
 ): Promise<UserProfile[]> => {
   try {
-    const snapshot = await firestore()
-      .collection('follows')
-      .where('follower', '==', userId)
-      .get();
+    const idToken = await getIdToken();
 
-    const followingIds = snapshot.docs.map(doc => doc.data().following);
+    const response = await fetch(
+      `${FIRESTORE_API_URL}:runQuery?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({
+          structuredQuery: {
+            from: [{ collectionId: 'follows' }],
+            where: {
+              fieldFilter: {
+                field: { fieldPath: 'follower' },
+                op: 'EQUAL',
+                value: { stringValue: userId },
+              },
+            },
+          },
+        }),
+      }
+    );
 
-    // Fetch user profiles for all following users
+    if (!response.ok) return [];
+
+    const data = await response.json();
     const profiles: UserProfile[] = [];
-    for (const followingId of followingIds) {
-      const profile = await getUserProfile(followingId);
-      if (profile) {
-        profiles.push(profile);
+
+    if (Array.isArray(data)) {
+      for (const doc of data) {
+        if (doc.document?.fields?.following?.stringValue) {
+          const profile = await getUserProfile(doc.document.fields.following.stringValue);
+          if (profile) {
+            profiles.push(profile);
+          }
+        }
       }
     }
 
@@ -393,52 +644,119 @@ export const getSuggestedUsers = async (
   limit: number = 20
 ): Promise<UserProfile[]> => {
   try {
-    console.log('Getting suggested users for:', currentUserId);
+    const idToken = await getIdToken();
 
     // Get all public users
-    const allUsersSnapshot = await firestore()
-      .collection('users')
-      .where('isPublic', '==', true)
-      .get();
+    const usersResponse = await fetch(
+      `${FIRESTORE_API_URL}:runQuery?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({
+          structuredQuery: {
+            from: [{ collectionId: 'users' }],
+            where: {
+              fieldFilter: {
+                field: { fieldPath: 'isPublic' },
+                op: 'EQUAL',
+                value: { booleanValue: true },
+              },
+            },
+          },
+        }),
+      }
+    );
 
-    const allUsers = allUsersSnapshot.docs.map(
-      doc => doc.data() as UserProfile
-    );
-    console.log(
-      'All public users:',
-      allUsers.map(u => ({ uid: u.uid, displayName: u.displayName }))
-    );
+    const allUsers: UserProfile[] = [];
+    if (usersResponse.ok) {
+      const usersData = await usersResponse.json();
+      if (Array.isArray(usersData)) {
+        usersData.forEach((doc: any) => {
+          if (doc.document) {
+            const user = convertFirestoreDoc(doc.document) as UserProfile;
+            allUsers.push(user);
+          }
+        });
+      }
+    }
 
     // Get current user's following list
-    const followingSnapshot = await firestore()
-      .collection('follows')
-      .where('follower', '==', currentUserId)
-      .get();
-
-    const followingIds = new Set(
-      followingSnapshot.docs.map(doc => doc.data().following)
+    const followingResponse = await fetch(
+      `${FIRESTORE_API_URL}:runQuery?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({
+          structuredQuery: {
+            from: [{ collectionId: 'follows' }],
+            where: {
+              fieldFilter: {
+                field: { fieldPath: 'follower' },
+                op: 'EQUAL',
+                value: { stringValue: currentUserId },
+              },
+            },
+          },
+        }),
+      }
     );
-    console.log('Currently following:', Array.from(followingIds));
+
+    const followingIds = new Set<string>();
+    if (followingResponse.ok) {
+      const followingData = await followingResponse.json();
+      if (Array.isArray(followingData)) {
+        followingData.forEach((doc: any) => {
+          if (doc.document?.fields?.following?.stringValue) {
+            followingIds.add(doc.document.fields.following.stringValue);
+          }
+        });
+      }
+    }
 
     // Filter out current user and users already followed
-    const suggested = allUsers.filter(user => {
-      const isNotCurrent = user.uid !== currentUserId;
-      const isNotFollowing = !followingIds.has(user.uid);
-      console.log(
-        `User ${user.displayName} (${user.uid}): isNotCurrent=${isNotCurrent}, isNotFollowing=${isNotFollowing}`
-      );
-      return isNotCurrent && isNotFollowing;
-    });
+    const suggested = allUsers
+      .filter(user => user.uid !== currentUserId && !followingIds.has(user.uid))
+      .sort(() => Math.random() - 0.5)
+      .slice(0, limit);
 
-    console.log(
-      'Suggested users after filter:',
-      suggested.map(u => ({ uid: u.uid, displayName: u.displayName }))
-    );
-
-    // Shuffle and limit results
-    return suggested.sort(() => Math.random() - 0.5).slice(0, limit);
+    return suggested;
   } catch (error) {
     console.error('Error getting suggested users:', error);
     return [];
   }
+};
+
+// Helper to convert Firestore REST API doc format to JS object
+const convertFirestoreDoc = (doc: any): any => {
+  const fields = doc.fields || {};
+  const result: any = { uid: doc.name.split('/').pop() };
+
+  for (const [key, field] of Object.entries(fields)) {
+    const value = field as any;
+    if (value.stringValue) {
+      result[key] = value.stringValue;
+    } else if (value.integerValue) {
+      result[key] = parseInt(value.integerValue);
+    } else if (value.booleanValue !== undefined) {
+      result[key] = value.booleanValue;
+    } else if (value.timestampValue) {
+      result[key] = new Date(value.timestampValue);
+    } else if (value.arrayValue) {
+      result[key] = (value.arrayValue.values || []).map((v: any) => {
+        if (v.stringValue) return v.stringValue;
+        if (v.integerValue) return parseInt(v.integerValue);
+        return v;
+      });
+    } else if (value.mapValue) {
+      result[key] = convertFirestoreDoc({ fields: value.mapValue.fields });
+    }
+  }
+
+  return result;
 };
