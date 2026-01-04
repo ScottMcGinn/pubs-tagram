@@ -1,44 +1,8 @@
 {
-  "expo": {
-    "name": "Pubs-tagram",
-    "slug": "pubs-tagram",
-    "version": "1.0.0-beta.1",
-    "orientation": "portrait",
-    "userInterfaceStyle": "light",
-    "splash": {
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.pubstagram.app"
-    },
-    "android": {
-      "adaptiveIcon": {
-        "backgroundColor": "#ffffff"
-      },
-      "package": "com.pubstagram.app",
-      "minSdkVersion": 21,
-      "targetSdkVersion": 35,
-      "permissions": [
-        "android.permission.INTERNET",
-        "android.permission.CAMERA",
-        "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.RECORD_AUDIO"
-      ]
-    },
-    "plugins": [
-      "@react-native-firebase/app",
-      "@react-native-firebase/auth",
-      "@react-native-firebase/firestore",
-      "@react-native-firebase/storage"
-    ],
-    "sdkVersion": "54.0.0",
-    "extra": {
-      "eas": {
-        "projectId": "be0193c6-e28e-4811-86a1-9cfc5a14f412"
-      }
-    }
+  "name": "Pubs-tagram",
+  "version": "1.0.0",
+  "newArchEnabled": true,
+  "project": {
+    "sourceDir": "android"
   }
 }
