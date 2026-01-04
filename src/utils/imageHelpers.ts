@@ -13,6 +13,11 @@ const loadImagePicker = async () => {
   if (!ImagePicker) {
     try {
       ImagePicker = await import('expo-image-picker');
+      // Request permissions
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        throw new Error('Permission to access media library was denied');
+      }
     } catch (error) {
       console.warn('Failed to load ImagePicker:', error);
       throw new Error('Image picker not available');
