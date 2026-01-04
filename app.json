@@ -1,8 +1,45 @@
 {
-  "name": "Pubs-tagram",
-  "version": "1.0.0",
-  "newArchEnabled": true,
-  "project": {
-    "sourceDir": "android"
+  "expo": {
+    "name": "Pubs-tagram",
+    "slug": "pubs-tagram",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.pubstagram.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.pubstagram.app",
+      "permissions": [
+        "android.permission.INTERNET",
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Pubs-tagram to access your photos to add pub pictures.",
+          "cameraPermission": "Allow Pubs-tagram to use your camera to take pub pictures."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "be0193c6-e28e-4811-86a1-9cfc5a14f412"
+      }
+    }
   }
 }

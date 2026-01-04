@@ -3,8 +3,8 @@ module.exports = {
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
-    'plugin:react/recommended',
-    'plugin:react-hooks/recommended',
+    'plugin:react-native/all',
+    'plugin:prettier/recommended',
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
@@ -14,15 +14,15 @@ module.exports = {
     ecmaVersion: 2021,
     sourceType: 'module',
   },
-  plugins: ['@typescript-eslint', 'react', 'react-hooks'],
+  plugins: ['@typescript-eslint', 'react-native', 'prettier'],
   rules: {
-    'react/react-in-jsx-scope': 'off',
     '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
-    'react/prop-types': 'off',
+    'react-native/no-unused-styles': 'warn',
+    'prettier/prettier': 'warn',
   },
   settings: {
     react: {
-      version: 'detect',
+      version: 'native',
     },
   },
 };

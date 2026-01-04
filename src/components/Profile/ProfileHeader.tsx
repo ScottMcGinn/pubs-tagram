@@ -1,5 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, ActivityIndicator, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  ActivityIndicator,
+  TouchableOpacity,
+} from 'react-native';
 import { UserProfile } from '../../types';
 
 interface ProfileHeaderProps {
@@ -61,7 +68,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 
       {/* Followers/Following Stats */}
       <View style={styles.statsContainer}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.statItem}
           onPress={onFollowersPress}
           disabled={!onFollowersPress}
@@ -70,7 +77,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           <Text style={styles.statLabel}>Followers</Text>
         </TouchableOpacity>
         <View style={styles.statDivider} />
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.statItem}
           onPress={onFollowingPress}
           disabled={!onFollowingPress}

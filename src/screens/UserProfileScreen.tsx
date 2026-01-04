@@ -21,7 +21,10 @@ import { getUserPubs } from '../services/firestore';
 import { getFollowersCount, getFollowingCount } from '../services/userProfiles';
 
 type UserProfileScreenRouteProp = any;
-type UserProfileNavigationProp = StackNavigationProp<RootStackParamList, 'UserProfile'>;
+type UserProfileNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  'UserProfile'
+>;
 
 type TabType = 'grid' | 'feed';
 
@@ -30,8 +33,15 @@ export const UserProfileScreen: React.FC = () => {
   const navigation = useNavigation<UserProfileNavigationProp>();
   const { userId } = route.params || {};
   const { width } = useWindowDimensions();
-  
-  const { otherUserProfile, loading, loadUserProfile, loadCurrentUserProfile, isFollowingUser, toggleFollowUser } = useUser();
+
+  const {
+    otherUserProfile,
+    loading,
+    loadUserProfile,
+    loadCurrentUserProfile,
+    isFollowingUser,
+    toggleFollowUser,
+  } = useUser();
   const [pubs, setPubs] = useState<Pub[]>([]);
   const [pubsLoading, setPubsLoading] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
@@ -113,8 +123,8 @@ export const UserProfileScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <ProfileHeader 
-          profile={otherUserProfile} 
+        <ProfileHeader
+          profile={otherUserProfile}
           editingMode={false}
           followersCount={followersCount}
           followingCount={followingCount}
@@ -145,9 +155,17 @@ export const UserProfileScreen: React.FC = () => {
             disabled={followLoading}
           >
             {followLoading ? (
-              <ActivityIndicator size="small" color={isFollowingUser ? '#262626' : '#FFFFFF'} />
+              <ActivityIndicator
+                size="small"
+                color={isFollowingUser ? '#262626' : '#FFFFFF'}
+              />
             ) : (
-              <Text style={[styles.followButtonText, isFollowingUser && styles.followingButtonText]}>
+              <Text
+                style={[
+                  styles.followButtonText,
+                  isFollowingUser && styles.followingButtonText,
+                ]}
+              >
                 {isFollowingUser ? 'Following' : 'Follow'}
               </Text>
             )}
@@ -163,7 +181,12 @@ export const UserProfileScreen: React.FC = () => {
             style={[styles.tab, activeTab === 'grid' && styles.tabActive]}
             onPress={() => setActiveTab('grid')}
           >
-            <Text style={[styles.tabText, activeTab === 'grid' && styles.tabTextActive]}>
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === 'grid' && styles.tabTextActive,
+              ]}
+            >
               Posts
             </Text>
           </TouchableOpacity>
@@ -171,7 +194,12 @@ export const UserProfileScreen: React.FC = () => {
             style={[styles.tab, activeTab === 'feed' && styles.tabActive]}
             onPress={() => setActiveTab('feed')}
           >
-            <Text style={[styles.tabText, activeTab === 'feed' && styles.tabTextActive]}>
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === 'feed' && styles.tabTextActive,
+              ]}
+            >
               List
             </Text>
           </TouchableOpacity>
@@ -181,12 +209,16 @@ export const UserProfileScreen: React.FC = () => {
         {activeTab === 'grid' && (
           <View style={styles.gridContainer}>
             {pubsLoading ? (
-              <ActivityIndicator size="large" color="#007AFF" style={styles.loader} />
+              <ActivityIndicator
+                size="large"
+                color="#007AFF"
+                style={styles.loader}
+              />
             ) : pubs.length === 0 ? (
               <Text style={styles.emptyMessage}>No pubs yet</Text>
             ) : (
               <View style={styles.grid}>
-                {pubs.map((pub) => (
+                {pubs.map(pub => (
                   <TouchableOpacity
                     key={pub.pubId}
                     style={styles.gridItem}
@@ -212,12 +244,16 @@ export const UserProfileScreen: React.FC = () => {
         {activeTab === 'feed' && (
           <View style={styles.feedContainer}>
             {pubsLoading ? (
-              <ActivityIndicator size="large" color="#007AFF" style={styles.loader} />
+              <ActivityIndicator
+                size="large"
+                color="#007AFF"
+                style={styles.loader}
+              />
             ) : pubs.length === 0 ? (
               <Text style={styles.emptyMessage}>No pubs yet</Text>
             ) : (
               <View style={{ paddingBottom: 20 }}>
-                {pubs.map((pub) => (
+                {pubs.map(pub => (
                   <TouchableOpacity
                     key={pub.pubId}
                     style={styles.feedCard}
@@ -231,13 +267,21 @@ export const UserProfileScreen: React.FC = () => {
                       />
                       <View style={styles.feedCardInfo}>
                         <Text style={styles.feedCardTitle}>{pub.pubName}</Text>
-                        <Text style={styles.feedCardLocation}>{pub.location}</Text>
+                        <Text style={styles.feedCardLocation}>
+                          {pub.location}
+                        </Text>
                         {pub.whatYouHad && (
-                          <Text style={styles.feedCardHad}>🍺 {pub.whatYouHad}</Text>
+                          <Text style={styles.feedCardHad}>
+                            🍺 {pub.whatYouHad}
+                          </Text>
                         )}
                         <View style={styles.feedCardRatings}>
-                          <Text style={styles.rating}>🍻 {pub.beerQuality}/5</Text>
-                          <Text style={styles.rating}>💷 {pub.valueForMoney}/5</Text>
+                          <Text style={styles.rating}>
+                            🍻 {pub.beerQuality}/5
+                          </Text>
+                          <Text style={styles.rating}>
+                            💷 {pub.valueForMoney}/5
+                          </Text>
                         </View>
                       </View>
                     </View>

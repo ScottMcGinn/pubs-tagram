@@ -13,10 +13,18 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList, UserProfile } from '../types';
-import { getSuggestedUsers, followUser, unfollowUser, isFollowing } from '../services/userProfiles';
+import {
+  getSuggestedUsers,
+  followUser,
+  unfollowUser,
+  isFollowing,
+} from '../services/userProfiles';
 import { useAuth } from '../contexts/AuthContext';
 
-type DiscoverNavigationProp = StackNavigationProp<RootStackParamList, 'Discover'>;
+type DiscoverNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  'Discover'
+>;
 
 interface UserWithFollowState extends UserProfile {
   isFollowing?: boolean;
@@ -26,7 +34,9 @@ export const DiscoverScreen: React.FC = () => {
   const navigation = useNavigation<DiscoverNavigationProp>();
   const { user } = useAuth();
 
-  const [suggestedUsers, setSuggestedUsers] = useState<UserWithFollowState[]>([]);
+  const [suggestedUsers, setSuggestedUsers] = useState<UserWithFollowState[]>(
+    []
+  );
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [followingMap, setFollowingMap] = useState<Record<string, boolean>>({});
@@ -40,7 +50,7 @@ export const DiscoverScreen: React.FC = () => {
     try {
       setLoading(true);
       const users = await getSuggestedUsers(user.uid, 30);
-      
+
       // Check follow status for each user
       const followMap: Record<string, boolean> = {};
       for (const u of users) {
@@ -66,7 +76,7 @@ export const DiscoverScreen: React.FC = () => {
 
     try {
       const isCurrentlyFollowing = followingMap[userId];
-      
+
       if (isCurrentlyFollowing) {
         await unfollowUser(user.uid, userId);
       } else {
@@ -90,7 +100,9 @@ export const DiscoverScreen: React.FC = () => {
       <View style={styles.userCard}>
         <TouchableOpacity
           style={styles.cardContent}
-          onPress={() => navigation.navigate('UserProfile', { userId: item.uid })}
+          onPress={() =>
+            navigation.navigate('UserProfile', { userId: item.uid })
+          }
           activeOpacity={0.7}
         >
           {item.profilePictureUrl ? (
@@ -107,7 +119,11 @@ export const DiscoverScreen: React.FC = () => {
           )}
           <View style={styles.userInfo}>
             <Text style={styles.displayName}>{item.displayName}</Text>
-            {item.bio && <Text style={styles.bio} numberOfLines={2}>{item.bio}</Text>}
+            {item.bio && (
+              <Text style={styles.bio} numberOfLines={2}>
+                {item.bio}
+              </Text>
+            )}
           </View>
         </TouchableOpacity>
 

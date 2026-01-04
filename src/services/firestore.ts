@@ -21,21 +21,26 @@ export const createPub = async (
     // Generate ID client-side
     const pubId = `pub_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const timestamp = firestore.Timestamp.now();
-    
-    await firestore().collection('pubs').doc(pubId).set({
-      userId,
-      pubName: pubData.pubName,
-      location: pubData.location,
-      whatYouHad: pubData.whatYouHad || '',
-      valueForMoney: pubData.valueForMoney,
-      beerQuality: pubData.beerQuality,
-      foodQuality: pubData.foodQuality || null,
-      visitDate: pubData.visitDate ? firestore.Timestamp.fromDate(pubData.visitDate) : null,
-      photoUrls: pubData.photoUrls,
-      thumbnailUrls: pubData.thumbnailUrls,
-      createdAt: timestamp,
-      updatedAt: timestamp,
-    });
+
+    await firestore()
+      .collection('pubs')
+      .doc(pubId)
+      .set({
+        userId,
+        pubName: pubData.pubName,
+        location: pubData.location,
+        whatYouHad: pubData.whatYouHad || '',
+        valueForMoney: pubData.valueForMoney,
+        beerQuality: pubData.beerQuality,
+        foodQuality: pubData.foodQuality || null,
+        visitDate: pubData.visitDate
+          ? firestore.Timestamp.fromDate(pubData.visitDate)
+          : null,
+        photoUrls: pubData.photoUrls,
+        thumbnailUrls: pubData.thumbnailUrls,
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      });
 
     return pubId;
   } catch (error) {
@@ -60,7 +65,7 @@ export const getUserPubs = async (userId: string): Promise<Pub[]> => {
     let userProfile: UserProfile | null = null;
     try {
       userProfile = await getUserProfile(userId);
-      
+
       // Migration: if user has no profile but is trying to view pubs, create one
       if (!userProfile) {
         console.log(`Profile missing for user ${userId}, creating...`);
@@ -69,7 +74,10 @@ export const getUserPubs = async (userId: string): Promise<Pub[]> => {
           await createUserProfile(userId, displayName, userId);
           userProfile = await getUserProfile(userId);
         } catch (createError) {
-          console.error('Error creating profile during migration:', createError);
+          console.error(
+            'Error creating profile during migration:',
+            createError
+          );
         }
       }
     } catch (error) {
@@ -92,10 +100,12 @@ export const getUserPubs = async (userId: string): Promise<Pub[]> => {
         thumbnailUrls: data.thumbnailUrls,
         createdAt: data.createdAt.toDate(),
         updatedAt: data.updatedAt.toDate(),
-        userProfile: userProfile ? {
-          displayName: userProfile.displayName,
-          profilePictureUrl: userProfile.profilePictureUrl,
-        } : undefined,
+        userProfile: userProfile
+          ? {
+              displayName: userProfile.displayName,
+              profilePictureUrl: userProfile.profilePictureUrl,
+            }
+          : undefined,
       });
     });
 
@@ -118,36 +128,41 @@ export const deletePub = async (pubId: string): Promise<void> => {
 /**
  * Get explore pubs - pubs from users not followed by current user
  */
-export const getExplorePubs = async (currentUserId: string, limit: number = 50): Promise<Pub[]> => {
+export const getExplorePubs = async (
+  currentUserId: string,
+  limit: number = 50
+): Promise<Pub[]> => {
   try {
     // Get current user's following list
     const followsSnapshot = await firestore()
       .collection('follows')
       .where('follower', '==', currentUserId)
       .get();
-    
-    const followingIds = new Set(followsSnapshot.docs.map(doc => doc.data().following));
-    
+
+    const followingIds = new Set(
+      followsSnapshot.docs.map(doc => doc.data().following)
+    );
+
     // Get all pubs
     const allPubsSnapshot = await firestore()
       .collection('pubs')
       .orderBy('visitDate', 'desc')
       .get();
-    
+
     const explorePubs: Pub[] = [];
-    
+
     for (const doc of allPubsSnapshot.docs) {
       if (explorePubs.length >= limit) break;
-      
+
       const pubData = doc.data() as any;
       const pubId = doc.id;
       const userId = pubData.userId;
-      
+
       // Only include pubs from users not being followed and not from current user
       if (!followingIds.has(userId) && userId !== currentUserId) {
         try {
           const userProfile = await getUserProfile(userId);
-          
+
           if (userProfile) {
             const pub: Pub = {
               pubId,
@@ -177,7 +192,7 @@ export const getExplorePubs = async (currentUserId: string, limit: number = 50):
         }
       }
     }
-    
+
     return explorePubs;
   } catch (error) {
     console.error('Error getting explore pubs:', error);
@@ -204,7 +219,10 @@ export const likePub = async (userId: string, pubId: string): Promise<void> => {
 };
 
 // Unlike a pub
-export const unlikePub = async (userId: string, pubId: string): Promise<void> => {
+export const unlikePub = async (
+  userId: string,
+  pubId: string
+): Promise<void> => {
   try {
     await firestore()
       .collection('pubs')
@@ -219,7 +237,10 @@ export const unlikePub = async (userId: string, pubId: string): Promise<void> =>
 };
 
 // Check if user has liked a pub
-export const hasLikedPub = async (userId: string, pubId: string): Promise<boolean> => {
+export const hasLikedPub = async (
+  userId: string,
+  pubId: string
+): Promise<boolean> => {
   try {
     const likeDoc = await firestore()
       .collection('pubs')
@@ -250,7 +271,10 @@ export const getLikeCount = async (pubId: string): Promise<number> => {
 };
 
 // Dislike a pub
-export const dislikePub = async (userId: string, pubId: string): Promise<void> => {
+export const dislikePub = async (
+  userId: string,
+  pubId: string
+): Promise<void> => {
   try {
     await firestore()
       .collection('pubs')
@@ -268,7 +292,10 @@ export const dislikePub = async (userId: string, pubId: string): Promise<void> =
 };
 
 // Remove dislike from a pub
-export const undislikePub = async (userId: string, pubId: string): Promise<void> => {
+export const undislikePub = async (
+  userId: string,
+  pubId: string
+): Promise<void> => {
   try {
     await firestore()
       .collection('pubs')
@@ -283,7 +310,10 @@ export const undislikePub = async (userId: string, pubId: string): Promise<void>
 };
 
 // Check if user has disliked a pub
-export const hasDislikedPub = async (userId: string, pubId: string): Promise<boolean> => {
+export const hasDislikedPub = async (
+  userId: string,
+  pubId: string
+): Promise<boolean> => {
   try {
     const dislikeDoc = await firestore()
       .collection('pubs')

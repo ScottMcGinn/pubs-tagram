@@ -48,13 +48,13 @@ const AddPubScreen = () => {
   const handleFilesAdded = (files: FileList | File[]) => {
     const fileArray = Array.from(files);
     const imageFiles = fileArray.filter(file => file.type.startsWith('image/'));
-    
+
     const remainingSlots = 5 - photos.length;
     const filesToAdd = imageFiles.slice(0, remainingSlots);
 
     filesToAdd.forEach(file => {
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = e => {
         if (e.target?.result) {
           setPhotos(prev => [...prev, { uri: e.target!.result as string }]);
         }
@@ -63,7 +63,9 @@ const AddPubScreen = () => {
     });
 
     if (imageFiles.length > remainingSlots) {
-      alert(`Only ${remainingSlots} more photos can be added (maximum 5 total)`);
+      alert(
+        `Only ${remainingSlots} more photos can be added (maximum 5 total)`
+      );
     }
   };
 
@@ -121,13 +123,7 @@ const AddPubScreen = () => {
       const tempPubId = `pub_${Date.now()}`;
 
       const uploadPromises = photos.map(async (photo, index) => {
-        return uploadPubPhoto(
-          user.uid,
-          tempPubId,
-          photo.uri,
-          photo.uri,
-          index
-        );
+        return uploadPubPhoto(user.uid, tempPubId, photo.uri, photo.uri, index);
       });
 
       const uploadResults = await Promise.all(uploadPromises);
@@ -185,7 +181,7 @@ const AddPubScreen = () => {
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.section}>
           <Text style={styles.label}>Photos (1-5 required) *</Text>
-          
+
           <View style={styles.photoGrid}>
             {photos.map((photo, index) => (
               <View key={index} style={styles.photoContainer}>

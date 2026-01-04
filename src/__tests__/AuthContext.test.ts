@@ -19,7 +19,10 @@ describe('Firebase Auth Module', () => {
     (auth.onAuthStateChanged as jest.Mock).mockReturnValue(mockUnsubscribe);
 
     // Simulate usage
-    const unsubscribe = (auth.onAuthStateChanged as jest.Mock)({}, mockCallback);
+    const unsubscribe = (auth.onAuthStateChanged as jest.Mock)(
+      {},
+      mockCallback
+    );
 
     expect(auth.onAuthStateChanged).toHaveBeenCalled();
     expect(unsubscribe).toBe(mockUnsubscribe);

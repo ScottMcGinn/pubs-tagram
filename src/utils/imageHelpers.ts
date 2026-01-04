@@ -1,5 +1,4 @@
-import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
-import { PermissionsAndroid, Platform } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 
 export interface ImageResult {
   uri: string;
@@ -7,88 +6,40 @@ export interface ImageResult {
   height: number;
 }
 
-// Request permissions (Android only)
-const requestPermissions = async (): Promise<boolean> => {
-  if (Platform.OS !== 'android') {
-    return true;
-  }
-
-  try {
-    const permissions = [
-      PermissionsAndroid.PERMISSIONS.CAMERA,
-      PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
-    ];
-
-    const granted = await PermissionsAndroid.requestMultiple(permissions);
-    return Object.values(granted).every(
-      (permission) => permission === PermissionsAndroid.RESULTS.GRANTED
-    );
-  } catch (err) {
-    console.error('Permission request failed:', err);
-    return false;
-  }
-};
-
 // Pick image from camera
 export const pickImageFromCamera = async (): Promise<ImageResult | null> => {
-  const hasPermission = await requestPermissions();
-  if (!hasPermission) {
-    return null;
+  const result = await ImagePicker.launchCameraAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    aspect: [4, 3],
+    quality: 0.8,
+  });
+
+  if (!result.canceled && result.assets?.[0]) {
+    const asset = result.assets[0];
+    return {
+      uri: asset.uri,
+      width: asset.width,
+      height: asset.height,
+    };
   }
 
-  return new Promise((resolve) => {
-    launchCamera(
-      {
-        mediaType: 'photo',
-        quality: 0.8,
-      },
-      (response: any) => {
-        if (!response.didCancel && !response.errorCode && response.assets?.[0]) {
-          const asset = response.assets[0];
-          resolve({
-            uri: asset.uri,
-            width: asset.width || 100,
-            height: asset.height || 100,
-          });
-        } else {
-          resolve(null);
-        }
-      }
-    );
-  });
+  return null;
 };
 
 // Pick image from gallery
 export const pickImageFromGallery = async (): Promise<ImageResult | null> => {
-  const hasPermission = await requestPermissions();
-  if (!hasPermission) {
-    return null;
-  }
-
-  return new Promise((resolve) => {
-    launchImageLibrary(
-      {
-        mediaType: 'photo',
-        quality: 0.8,
-      },
-      (response: any) => {
-        if (!response.didCancel && !response.errorCode && response.assets?.[0]) {
-          const asset = response.assets[0];
-          resolve({
-            uri: asset.uri,
-            width: asset.width || 100,
-            height: asset.height || 100,
-          });
-        } else {
-          resolve(null);
-        }
-      }
-    );
+  const result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    aspect: [4, 3],
+    quality: 0.8,
   });
-};
-      uri: result.assets[0].uri,
-      width: result.assets[0].width,
-      height: result.assets[0].height,
+
+  if (!result.canceled && result.assets?.[0]) {
+    const asset = result.assets[0];
+    return {
+      uri: asset.uri,
+      width: asset.width,
+      height: asset.height,
     };
   }
 

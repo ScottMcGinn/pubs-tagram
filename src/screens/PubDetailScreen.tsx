@@ -11,10 +11,25 @@ import {
   Modal,
   ActivityIndicator,
 } from 'react-native';
-import { useRoute, useNavigation, useFocusEffect, RouteProp } from '@react-navigation/native';
+import {
+  useRoute,
+  useNavigation,
+  useFocusEffect,
+  RouteProp,
+} from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
-import { deletePub, likePub, unlikePub, hasLikedPub, getLikeCount, dislikePub, undislikePub, hasDislikedPub, getDislikeCount } from '../services/firestore';
+import {
+  deletePub,
+  likePub,
+  unlikePub,
+  hasLikedPub,
+  getLikeCount,
+  dislikePub,
+  undislikePub,
+  hasDislikedPub,
+  getDislikeCount,
+} from '../services/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import storage from '@react-native-firebase/storage';
 
@@ -31,7 +46,7 @@ const PubDetailScreen = () => {
   const navigation = useNavigation<PubDetailNavigationProp>();
   const { pub } = route.params;
   const { user } = useAuth();
-  
+
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [showMenu, setShowMenu] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -51,14 +66,14 @@ const PubDetailScreen = () => {
     try {
       const count = await getLikeCount(pub.pubId);
       setLikeCount(count);
-      
+
       const discount = await getDislikeCount(pub.pubId);
       setDislikeCount(discount);
-      
+
       if (user?.uid) {
         const liked = await hasLikedPub(user.uid, pub.pubId);
         setHasLiked(liked);
-        
+
         const disliked = await hasDislikedPub(user.uid, pub.pubId);
         setHasDisliked(disliked);
       }
@@ -69,7 +84,7 @@ const PubDetailScreen = () => {
 
   const handleToggleLike = async () => {
     if (!user?.uid) return;
-    
+
     try {
       if (hasLiked) {
         await unlikePub(user.uid, pub.pubId);
@@ -93,7 +108,7 @@ const PubDetailScreen = () => {
 
   const handleToggleDislike = async () => {
     if (!user?.uid) return;
-    
+
     try {
       if (hasDisliked) {
         await undislikePub(user.uid, pub.pubId);
@@ -137,15 +152,17 @@ const PubDetailScreen = () => {
     console.log('Confirmed delete');
     setShowDeleteConfirm(false);
     setDeleting(true);
-    
+
     try {
       console.log('Starting delete for pub:', pub.pubId);
-      
+
       // Delete photos from Storage
       const deletePhotoPromises = pub.photoUrls.map(async (url: string) => {
         try {
           const urlObj = new URL(url);
-          const path = decodeURIComponent(urlObj.pathname.split('/o/')[1].split('?')[0]);
+          const path = decodeURIComponent(
+            urlObj.pathname.split('/o/')[1].split('?')[0]
+          );
           console.log('Deleting photo:', path);
           const photoRef = storage().ref(path);
           await photoRef.delete();
@@ -154,17 +171,21 @@ const PubDetailScreen = () => {
         }
       });
 
-      const deleteThumbnailPromises = pub.thumbnailUrls.map(async (url: string) => {
-        try {
-          const urlObj = new URL(url);
-          const path = decodeURIComponent(urlObj.pathname.split('/o/')[1].split('?')[0]);
-          console.log('Deleting thumbnail:', path);
-          const thumbRef = storage().ref(path);
-          await thumbRef.delete();
-        } catch (error) {
-          console.error('Error deleting thumbnail:', error);
+      const deleteThumbnailPromises = pub.thumbnailUrls.map(
+        async (url: string) => {
+          try {
+            const urlObj = new URL(url);
+            const path = decodeURIComponent(
+              urlObj.pathname.split('/o/')[1].split('?')[0]
+            );
+            console.log('Deleting thumbnail:', path);
+            const thumbRef = storage().ref(path);
+            await thumbRef.delete();
+          } catch (error) {
+            console.error('Error deleting thumbnail:', error);
+          }
         }
-      });
+      );
 
       await Promise.all([...deletePhotoPromises, ...deleteThumbnailPromises]);
       console.log('Photos deleted');
@@ -208,10 +229,12 @@ const PubDetailScreen = () => {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Text style={styles.backButton}>←</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => {
-          console.log('Menu button clicked');
-          setShowMenu(true);
-        }}>
+        <TouchableOpacity
+          onPress={() => {
+            console.log('Menu button clicked');
+            setShowMenu(true);
+          }}
+        >
           <Text style={styles.menuButton}>⋮</Text>
         </TouchableOpacity>
       </View>
@@ -234,7 +257,7 @@ const PubDetailScreen = () => {
           <TouchableOpacity
             style={styles.menuContainer}
             activeOpacity={1}
-            onPress={(e) => e.stopPropagation()}
+            onPress={e => e.stopPropagation()}
           >
             <TouchableOpacity
               style={styles.menuItem}
@@ -263,7 +286,8 @@ const PubDetailScreen = () => {
           <View style={styles.confirmDialog}>
             <Text style={styles.confirmTitle}>Delete Pub</Text>
             <Text style={styles.confirmMessage}>
-              Are you sure you want to delete "{pub.pubName}"? This cannot be undone.
+              Are you sure you want to delete "{pub.pubName}"? This cannot be
+              undone.
             </Text>
             <View style={styles.confirmButtons}>
               <TouchableOpacity
@@ -276,7 +300,12 @@ const PubDetailScreen = () => {
                 style={[styles.confirmButton, styles.confirmButtonDelete]}
                 onPress={handleDelete}
               >
-                <Text style={[styles.confirmButtonText, styles.confirmButtonTextDelete]}>
+                <Text
+                  style={[
+                    styles.confirmButtonText,
+                    styles.confirmButtonTextDelete,
+                  ]}
+                >
                   Delete
                 </Text>
               </TouchableOpacity>
@@ -290,7 +319,9 @@ const PubDetailScreen = () => {
         {pub.userProfile && (
           <TouchableOpacity
             style={styles.userHeader}
-            onPress={() => navigation.navigate('UserProfile', { userId: pub.userId })}
+            onPress={() =>
+              navigation.navigate('UserProfile', { userId: pub.userId })
+            }
             activeOpacity={0.7}
           >
             {pub.userProfile.profilePictureUrl ? (
@@ -299,7 +330,12 @@ const PubDetailScreen = () => {
                 style={styles.userProfilePicture}
               />
             ) : (
-              <View style={[styles.userProfilePicture, styles.userProfilePictureEmpty]}>
+              <View
+                style={[
+                  styles.userProfilePicture,
+                  styles.userProfilePictureEmpty,
+                ]}
+              >
                 <Text style={styles.userProfilePictureText}>👤</Text>
               </View>
             )}
@@ -318,7 +354,7 @@ const PubDetailScreen = () => {
             style={styles.photo}
             resizeMode="cover"
           />
-          
+
           {/* Navigation Arrows */}
           {pub.photoUrls.length > 1 && (
             <>
@@ -330,7 +366,7 @@ const PubDetailScreen = () => {
                   <Text style={styles.photoNavButtonText}>‹</Text>
                 </TouchableOpacity>
               )}
-              
+
               {currentPhotoIndex < pub.photoUrls.length - 1 && (
                 <TouchableOpacity
                   style={[styles.photoNavButton, styles.photoNavButtonRight]}
@@ -384,7 +420,7 @@ const PubDetailScreen = () => {
         {/* Ratings */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Ratings</Text>
-          
+
           <View style={styles.ratingRow}>
             <Text style={styles.ratingLabel}>Value for Money:</Text>
             <View style={styles.ratingIcons}>

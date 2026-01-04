@@ -2,7 +2,14 @@ import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useAuth } from '../contexts/AuthContext';
-import { ActivityIndicator, View, StyleSheet, Text, SafeAreaView, TouchableOpacity } from 'react-native';
+import {
+  ActivityIndicator,
+  View,
+  StyleSheet,
+  Text,
+  SafeAreaView,
+  TouchableOpacity,
+} from 'react-native';
 
 // Screens
 import AuthScreen from '../screens/AuthScreen';
@@ -36,13 +43,22 @@ function AppTabs() {
         options={({ navigation }: any) => ({
           title: 'Pubs-tagram',
           tabBarLabel: 'Feed',
-          tabBarIcon: ({ color }: any) => <Text style={{ fontSize: 20, color }}>⊞</Text>,
+          tabBarIcon: ({ color }: any) => (
+            <Text style={{ fontSize: 20, color }}>⊞</Text>
+          ),
           headerRight: () => (
-            <View style={{ flexDirection: 'row', marginRight: 16, gap: 12, alignItems: 'center' }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                marginRight: 16,
+                gap: 12,
+                alignItems: 'center',
+              }}
+            >
               <TouchableOpacity onPress={() => navigation.navigate('Search')}>
                 <Text style={{ fontSize: 20 }}>🔍</Text>
               </TouchableOpacity>
-              <TouchableOpacity 
+              <TouchableOpacity
                 onPress={() => navigation.navigate('AddPub')}
                 style={{
                   backgroundColor: '#007AFF',
@@ -51,7 +67,11 @@ function AppTabs() {
                   borderRadius: 20,
                 }}
               >
-                <Text style={{ color: '#fff', fontSize: 14, fontWeight: '600' }}>Add Pub</Text>
+                <Text
+                  style={{ color: '#fff', fontSize: 14, fontWeight: '600' }}
+                >
+                  Add Pub
+                </Text>
               </TouchableOpacity>
             </View>
           ),
@@ -63,7 +83,9 @@ function AppTabs() {
         options={{
           title: 'Profile',
           tabBarLabel: 'Profile',
-          tabBarIcon: ({ color }: any) => <Text style={{ fontSize: 20, color }}>👤</Text>,
+          tabBarIcon: ({ color }: any) => (
+            <Text style={{ fontSize: 20, color }}>👤</Text>
+          ),
         }}
       />
     </Tab.Navigator>
@@ -73,8 +95,8 @@ function AppTabs() {
 function AuthStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen 
-        name="Auth" 
+      <Stack.Screen
+        name="Auth"
         component={AuthScreen}
         options={({ navigation }: any) => ({
           headerShown: false,
@@ -88,10 +110,26 @@ function AppStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Home" component={AppTabs} />
-      <Stack.Screen name="AddPub" component={AddPubScreen} options={{ title: 'Add Pub', headerShown: true }} />
-      <Stack.Screen name="PubDetail" component={PubDetailScreen} options={{ title: 'Pub Details', headerShown: true }} />
-      <Stack.Screen name="Search" component={SearchScreen} options={{ title: 'Search Users', headerShown: true }} />
-      <Stack.Screen name="UserProfile" component={UserProfileScreen} options={{ title: 'User Profile', headerShown: true }} />
+      <Stack.Screen
+        name="AddPub"
+        component={AddPubScreen}
+        options={{ title: 'Add Pub', headerShown: true }}
+      />
+      <Stack.Screen
+        name="PubDetail"
+        component={PubDetailScreen}
+        options={{ title: 'Pub Details', headerShown: true }}
+      />
+      <Stack.Screen
+        name="Search"
+        component={SearchScreen}
+        options={{ title: 'Search Users', headerShown: true }}
+      />
+      <Stack.Screen
+        name="UserProfile"
+        component={UserProfileScreen}
+        options={{ title: 'User Profile', headerShown: true }}
+      />
     </Stack.Navigator>
   );
 }

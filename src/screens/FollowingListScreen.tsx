@@ -15,7 +15,10 @@ import { RootStackParamList, UserProfile } from '../types';
 import { getFollowingList } from '../services/userProfiles';
 
 type FollowingListScreenRouteProp = any;
-type FollowingListNavigationProp = StackNavigationProp<RootStackParamList, 'FollowingList'>;
+type FollowingListNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  'FollowingList'
+>;
 
 export const FollowingListScreen: React.FC = () => {
   const route = useRoute<FollowingListScreenRouteProp>();
@@ -63,7 +66,11 @@ export const FollowingListScreen: React.FC = () => {
         )}
         <View style={styles.userInfo}>
           <Text style={styles.displayName}>{item.displayName}</Text>
-          {item.bio && <Text style={styles.bio} numberOfLines={1}>{item.bio}</Text>}
+          {item.bio && (
+            <Text style={styles.bio} numberOfLines={1}>
+              {item.bio}
+            </Text>
+          )}
         </View>
       </View>
       <Text style={styles.chevron}>›</Text>
@@ -83,7 +90,10 @@ export const FollowingListScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
           <Text style={styles.backButtonText}>‹</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Following</Text>

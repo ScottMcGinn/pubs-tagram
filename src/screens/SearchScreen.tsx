@@ -25,7 +25,9 @@ export const SearchScreen: React.FC = () => {
   const { width } = useWindowDimensions();
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [results, setResults] = useState<(UserProfile & { followersCount?: number })[]>([]);
+  const [results, setResults] = useState<
+    (UserProfile & { followersCount?: number })[]
+  >([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
 
@@ -61,13 +63,13 @@ export const SearchScreen: React.FC = () => {
       const searchResults = await searchUsers(searchTerm, 50);
       // Filter out current user
       const filtered = searchResults.filter(u => u.uid !== user?.uid);
-      
+
       // Fetch follower counts for all results
       const counts: Record<string, number> = {};
       for (const user of filtered) {
         counts[user.uid] = await getFollowersCount(user.uid);
       }
-      
+
       // Add follower counts to results
       const resultsWithCounts = filtered.map(u => ({
         ...u,
@@ -106,7 +108,11 @@ export const SearchScreen: React.FC = () => {
           <Text style={styles.followersCount}>
             {(item as any).followersCount || 0} followers
           </Text>
-          {item.bio && <Text style={styles.bio} numberOfLines={1}>{item.bio}</Text>}
+          {item.bio && (
+            <Text style={styles.bio} numberOfLines={1}>
+              {item.bio}
+            </Text>
+          )}
         </View>
       </View>
       <Text style={styles.chevron}>›</Text>

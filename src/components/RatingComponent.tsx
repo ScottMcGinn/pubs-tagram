@@ -22,9 +22,7 @@ const RatingComponent: React.FC<RatingComponentProps> = ({
           onPress={() => onRatingChange(value)}
           style={styles.iconButton}
         >
-          <Text style={styles.icon}>
-            {value <= rating ? icon : emptyIcon}
-          </Text>
+          <Text style={styles.icon}>{value <= rating ? icon : emptyIcon}</Text>
         </TouchableOpacity>
       ))}
     </View>

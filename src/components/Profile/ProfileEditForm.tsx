@@ -68,9 +68,7 @@ export const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
             editable={!loading && !isSaving}
             maxLength={50}
           />
-          <Text style={styles.charCount}>
-            {displayName.length}/50
-          </Text>
+          <Text style={styles.charCount}>{displayName.length}/50</Text>
         </View>
 
         {/* Bio */}
@@ -86,9 +84,7 @@ export const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
             editable={!loading && !isSaving}
             maxLength={200}
           />
-          <Text style={styles.charCount}>
-            {bio.length}/200
-          </Text>
+          <Text style={styles.charCount}>{bio.length}/200</Text>
         </View>
 
         {/* Save Button */}

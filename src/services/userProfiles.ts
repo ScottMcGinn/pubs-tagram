@@ -6,9 +6,13 @@ import { UserProfile } from '../types';
 /**
  * Create a new user profile
  */
-export const createUserProfile = async (uid: string, displayName: string, email: string): Promise<UserProfile> => {
+export const createUserProfile = async (
+  uid: string,
+  displayName: string,
+  email: string
+): Promise<UserProfile> => {
   const timestamp = firestore.Timestamp.now();
-  
+
   const profileData: any = {
     uid,
     email,
@@ -29,7 +33,9 @@ export const createUserProfile = async (uid: string, displayName: string, email:
 /**
  * Get user profile by UID
  */
-export const getUserProfile = async (uid: string): Promise<UserProfile | null> => {
+export const getUserProfile = async (
+  uid: string
+): Promise<UserProfile | null> => {
   try {
     const userSnap = await firestore().collection('users').doc(uid).get();
 
@@ -47,7 +53,9 @@ export const getUserProfile = async (uid: string): Promise<UserProfile | null> =
 /**
  * Get current user's profile (must be authenticated)
  */
-export const getCurrentUserProfile = async (uid: string): Promise<UserProfile | null> => {
+export const getCurrentUserProfile = async (
+  uid: string
+): Promise<UserProfile | null> => {
   return getUserProfile(uid);
 };
 
@@ -59,10 +67,13 @@ export const updateUserProfile = async (
   updates: Partial<Omit<UserProfile, 'uid' | 'email' | 'createdAt'>>
 ): Promise<void> => {
   try {
-    await firestore().collection('users').doc(uid).update({
-      ...updates,
-      updatedAt: firestore.Timestamp.now(),
-    });
+    await firestore()
+      .collection('users')
+      .doc(uid)
+      .update({
+        ...updates,
+        updatedAt: firestore.Timestamp.now(),
+      });
   } catch (error) {
     console.error('Error updating user profile:', error);
     throw error;
@@ -72,11 +83,14 @@ export const updateUserProfile = async (
 /**
  * Upload profile picture to Firebase Storage
  */
-export const uploadProfilePicture = async (uid: string, fileUri: string): Promise<string> => {
+export const uploadProfilePicture = async (
+  uid: string,
+  fileUri: string
+): Promise<string> => {
   try {
     // First ensure profile document exists
     const profileSnap = await firestore().collection('users').doc(uid).get();
-    
+
     if (!profileSnap.exists) {
       // Create profile if it doesn't exist
       const timestamp = firestore.Timestamp.now();
@@ -124,7 +138,7 @@ export const deleteProfilePicture = async (uid: string): Promise<void> => {
 
 /**
  * Search users by display name
- * 
+ *
  * @param searchTerm - The search term to filter by displayName
  * @param limit - Maximum number of results to return
  * @param blockedUserIds - Optional array of user IDs to exclude from results (for future blocking feature)
@@ -147,12 +161,14 @@ export const searchUsers = async (
       .filter(user => {
         // Exclude blocked users
         if (blockedUserIds.includes(user.uid)) return false;
-        
+
         // Exclude private profiles if requested (future feature)
         if (excludePrivate && user.isPublic === false) return false;
-        
+
         // Match search term
-        return user.displayName.toLowerCase().includes(searchTerm.toLowerCase());
+        return user.displayName
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase());
       })
       .slice(0, limit);
   } catch (error) {
@@ -176,7 +192,7 @@ export const userProfileExists = async (uid: string): Promise<boolean> => {
 
 /**
  * Get all discoverable profiles (for discovery) - paginated
- * 
+ *
  * @param limit - Maximum number of profiles to return
  * @param blockedUserIds - Optional array of user IDs to exclude from results (for future blocking feature)
  * @param excludePrivate - Optional flag to exclude private profiles (for future privacy feature)
@@ -198,10 +214,10 @@ export const getPublicProfiles = async (
       .filter(user => {
         // Exclude blocked users
         if (blockedUserIds.includes(user.uid)) return false;
-        
+
         // Exclude private profiles if requested (future feature)
         if (excludePrivate && user.isPublic === false) return false;
-        
+
         return true;
       })
       .slice(0, limit);
@@ -213,7 +229,10 @@ export const getPublicProfiles = async (
 /**
  * Follow a user - creates a document in the follows collection
  */
-export const followUser = async (currentUserId: string, targetUserId: string): Promise<void> => {
+export const followUser = async (
+  currentUserId: string,
+  targetUserId: string
+): Promise<void> => {
   try {
     // Create a document in the follows collection
     await firestore().collection('follows').add({
@@ -230,7 +249,10 @@ export const followUser = async (currentUserId: string, targetUserId: string): P
 /**
  * Unfollow a user - deletes the follow document
  */
-export const unfollowUser = async (currentUserId: string, targetUserId: string): Promise<void> => {
+export const unfollowUser = async (
+  currentUserId: string,
+  targetUserId: string
+): Promise<void> => {
   try {
     // Find and delete the follow relationship
     const snapshot = await firestore()
@@ -251,7 +273,10 @@ export const unfollowUser = async (currentUserId: string, targetUserId: string):
 /**
  * Check if current user is following target user
  */
-export const isFollowing = async (currentUserId: string, targetUserId: string): Promise<boolean> => {
+export const isFollowing = async (
+  currentUserId: string,
+  targetUserId: string
+): Promise<boolean> => {
   try {
     const snapshot = await firestore()
       .collection('follows')
@@ -303,7 +328,9 @@ export const getFollowingCount = async (userId: string): Promise<number> => {
 /**
  * Get list of users following a specific user (followers)
  */
-export const getFollowersList = async (userId: string): Promise<UserProfile[]> => {
+export const getFollowersList = async (
+  userId: string
+): Promise<UserProfile[]> => {
   try {
     const snapshot = await firestore()
       .collection('follows')
@@ -311,7 +338,7 @@ export const getFollowersList = async (userId: string): Promise<UserProfile[]> =
       .get();
 
     const followerIds = snapshot.docs.map(doc => doc.data().follower);
-    
+
     // Fetch user profiles for all followers
     const profiles: UserProfile[] = [];
     for (const followerId of followerIds) {
@@ -320,7 +347,7 @@ export const getFollowersList = async (userId: string): Promise<UserProfile[]> =
         profiles.push(profile);
       }
     }
-    
+
     return profiles;
   } catch (error) {
     console.error('Error getting followers list:', error);
@@ -331,7 +358,9 @@ export const getFollowersList = async (userId: string): Promise<UserProfile[]> =
 /**
  * Get list of users that a specific user is following (following)
  */
-export const getFollowingList = async (userId: string): Promise<UserProfile[]> => {
+export const getFollowingList = async (
+  userId: string
+): Promise<UserProfile[]> => {
   try {
     const snapshot = await firestore()
       .collection('follows')
@@ -339,7 +368,7 @@ export const getFollowingList = async (userId: string): Promise<UserProfile[]> =
       .get();
 
     const followingIds = snapshot.docs.map(doc => doc.data().following);
-    
+
     // Fetch user profiles for all following users
     const profiles: UserProfile[] = [];
     for (const followingId of followingIds) {
@@ -348,7 +377,7 @@ export const getFollowingList = async (userId: string): Promise<UserProfile[]> =
         profiles.push(profile);
       }
     }
-    
+
     return profiles;
   } catch (error) {
     console.error('Error getting following list:', error);
@@ -359,40 +388,53 @@ export const getFollowingList = async (userId: string): Promise<UserProfile[]> =
 /**
  * Get suggested users (public users not yet followed by current user)
  */
-export const getSuggestedUsers = async (currentUserId: string, limit: number = 20): Promise<UserProfile[]> => {
+export const getSuggestedUsers = async (
+  currentUserId: string,
+  limit: number = 20
+): Promise<UserProfile[]> => {
   try {
     console.log('Getting suggested users for:', currentUserId);
-    
+
     // Get all public users
     const allUsersSnapshot = await firestore()
       .collection('users')
       .where('isPublic', '==', true)
       .get();
-    
-    const allUsers = allUsersSnapshot.docs.map(doc => doc.data() as UserProfile);
-    console.log('All public users:', allUsers.map(u => ({ uid: u.uid, displayName: u.displayName })));
-    
+
+    const allUsers = allUsersSnapshot.docs.map(
+      doc => doc.data() as UserProfile
+    );
+    console.log(
+      'All public users:',
+      allUsers.map(u => ({ uid: u.uid, displayName: u.displayName }))
+    );
+
     // Get current user's following list
     const followingSnapshot = await firestore()
       .collection('follows')
       .where('follower', '==', currentUserId)
       .get();
-    
-    const followingIds = new Set(followingSnapshot.docs.map(doc => doc.data().following));
-    console.log('Currently following:', Array.from(followingIds));
-    
-    // Filter out current user and users already followed
-    const suggested = allUsers.filter(
-      user => {
-        const isNotCurrent = user.uid !== currentUserId;
-        const isNotFollowing = !followingIds.has(user.uid);
-        console.log(`User ${user.displayName} (${user.uid}): isNotCurrent=${isNotCurrent}, isNotFollowing=${isNotFollowing}`);
-        return isNotCurrent && isNotFollowing;
-      }
+
+    const followingIds = new Set(
+      followingSnapshot.docs.map(doc => doc.data().following)
     );
-    
-    console.log('Suggested users after filter:', suggested.map(u => ({ uid: u.uid, displayName: u.displayName })));
-    
+    console.log('Currently following:', Array.from(followingIds));
+
+    // Filter out current user and users already followed
+    const suggested = allUsers.filter(user => {
+      const isNotCurrent = user.uid !== currentUserId;
+      const isNotFollowing = !followingIds.has(user.uid);
+      console.log(
+        `User ${user.displayName} (${user.uid}): isNotCurrent=${isNotCurrent}, isNotFollowing=${isNotFollowing}`
+      );
+      return isNotCurrent && isNotFollowing;
+    });
+
+    console.log(
+      'Suggested users after filter:',
+      suggested.map(u => ({ uid: u.uid, displayName: u.displayName }))
+    );
+
     // Shuffle and limit results
     return suggested.sort(() => Math.random() - 0.5).slice(0, limit);
   } catch (error) {

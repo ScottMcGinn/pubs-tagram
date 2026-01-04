@@ -2,13 +2,20 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import { createUserProfile } from '../services/userProfiles';
 
-console.log('[AuthContext] Module loading - React Native Firebase auth available:', !!auth);
+console.log(
+  '[AuthContext] Module loading - React Native Firebase auth available:',
+  !!auth
+);
 
 interface AuthContextType {
   user: FirebaseAuthTypes.User | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, displayName: string) => Promise<void>;
+  signUp: (
+    email: string,
+    password: string,
+    displayName: string
+  ) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -42,16 +49,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     try {
       console.log('[AuthContext] Setting up onAuthStateChanged listener');
-      const unsubscribe = auth().onAuthStateChanged(
-        userState => {
-          if (isMounted) {
-            console.log('[AuthContext] Auth state changed:', !!userState);
-            setUser(userState);
-            setLoading(false);
-            clearTimeout(timeoutId);
-          }
+      const unsubscribe = auth().onAuthStateChanged(userState => {
+        if (isMounted) {
+          console.log('[AuthContext] Auth state changed:', !!userState);
+          setUser(userState);
+          setLoading(false);
+          clearTimeout(timeoutId);
         }
-      );
+      });
 
       return () => {
         isMounted = false;
@@ -78,10 +83,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const signUp = async (email: string, password: string, displayName: string) => {
+  const signUp = async (
+    email: string,
+    password: string,
+    displayName: string
+  ) => {
     console.log('[AuthContext] signUp attempt for:', email);
     try {
-      const result = await auth().createUserWithEmailAndPassword(email, password);
+      const result = await auth().createUserWithEmailAndPassword(
+        email,
+        password
+      );
       console.log('[AuthContext] signUp successful, creating profile');
       // Create user profile after successful sign up with chosen display name
       await createUserProfile(result.user.uid, displayName, email);

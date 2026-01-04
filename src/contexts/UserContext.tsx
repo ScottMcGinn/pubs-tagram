@@ -1,6 +1,14 @@
 import React, { createContext, useContext, useState } from 'react';
 import { UserProfile } from '../types';
-import { getCurrentUserProfile, updateUserProfile, uploadProfilePicture, deleteProfilePicture, followUser, unfollowUser, isFollowing } from '../services/userProfiles';
+import {
+  getCurrentUserProfile,
+  updateUserProfile,
+  uploadProfilePicture,
+  deleteProfilePicture,
+  followUser,
+  unfollowUser,
+  isFollowing,
+} from '../services/userProfiles';
 import { useAuth } from './AuthContext';
 
 interface UserContextType {
@@ -9,11 +17,13 @@ interface UserContextType {
   loading: boolean;
   error: Error | null;
   isFollowingUser: boolean;
-  
+
   // Actions
   loadCurrentUserProfile: () => Promise<void>;
   loadUserProfile: (uid: string) => Promise<void>;
-  updateProfile: (updates: Partial<Omit<UserProfile, 'uid' | 'email' | 'createdAt'>>) => Promise<void>;
+  updateProfile: (
+    updates: Partial<Omit<UserProfile, 'uid' | 'email' | 'createdAt'>>
+  ) => Promise<void>;
   uploadPicture: (uri: string) => Promise<void>;
   deletePicture: () => Promise<void>;
   toggleFollowUser: (targetUserId: string) => Promise<void>;
@@ -22,10 +32,15 @@ interface UserContextType {
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const { user } = useAuth();
-  const [currentUserProfile, setCurrentUserProfile] = useState<UserProfile | null>(null);
-  const [otherUserProfile, setOtherUserProfile] = useState<UserProfile | null>(null);
+  const [currentUserProfile, setCurrentUserProfile] =
+    useState<UserProfile | null>(null);
+  const [otherUserProfile, setOtherUserProfile] = useState<UserProfile | null>(
+    null
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [isFollowingUser, setIsFollowingUser] = useState(false);
@@ -39,7 +54,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const profile = await getCurrentUserProfile(user.uid);
       setCurrentUserProfile(profile);
     } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to load profile');
+      const error =
+        err instanceof Error ? err : new Error('Failed to load profile');
       setError(error);
       console.error('Error loading current user profile:', error);
     } finally {
@@ -53,7 +69,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setError(null);
       const profile = await getCurrentUserProfile(uid);
       setOtherUserProfile(profile);
-      
+
       // Check follow status if current user is logged in
       if (user?.uid && uid !== user.uid) {
         const following = await isFollowing(user.uid, uid);
@@ -62,7 +78,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsFollowingUser(false);
       }
     } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to load user profile');
+      const error =
+        err instanceof Error ? err : new Error('Failed to load user profile');
       setError(error);
       console.error('Error loading user profile:', error);
     } finally {
@@ -70,7 +87,9 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const updateProfile = async (updates: Partial<Omit<UserProfile, 'uid' | 'email' | 'createdAt'>>) => {
+  const updateProfile = async (
+    updates: Partial<Omit<UserProfile, 'uid' | 'email' | 'createdAt'>>
+  ) => {
     if (!user?.uid) {
       throw new Error('No user logged in');
     }
@@ -78,13 +97,14 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setLoading(true);
       setError(null);
-      
+
       await updateUserProfile(user.uid, updates);
-      
+
       // Update local state
-      setCurrentUserProfile(prev => prev ? { ...prev, ...updates } : null);
+      setCurrentUserProfile(prev => (prev ? { ...prev, ...updates } : null));
     } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to update profile');
+      const error =
+        err instanceof Error ? err : new Error('Failed to update profile');
       setError(error);
       throw error;
     } finally {
@@ -100,13 +120,16 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setLoading(true);
       setError(null);
-      
+
       const downloadUrl = await uploadProfilePicture(user.uid, uri);
-      
+
       // Update local state
-      setCurrentUserProfile(prev => prev ? { ...prev, profilePictureUrl: downloadUrl } : null);
+      setCurrentUserProfile(prev =>
+        prev ? { ...prev, profilePictureUrl: downloadUrl } : null
+      );
     } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to upload picture');
+      const error =
+        err instanceof Error ? err : new Error('Failed to upload picture');
       setError(error);
       throw error;
     } finally {
@@ -122,13 +145,16 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setLoading(true);
       setError(null);
-      
+
       await deleteProfilePicture(user.uid);
-      
+
       // Update local state
-      setCurrentUserProfile(prev => prev ? { ...prev, profilePictureUrl: undefined } : null);
+      setCurrentUserProfile(prev =>
+        prev ? { ...prev, profilePictureUrl: undefined } : null
+      );
     } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to delete picture');
+      const error =
+        err instanceof Error ? err : new Error('Failed to delete picture');
       setError(error);
       throw error;
     } finally {
@@ -154,25 +180,29 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Unfollow
         await unfollowUser(user.uid, targetUserId);
         setIsFollowingUser(false);
-        
+
         // Update local state
         if (otherUserProfile) {
           setOtherUserProfile({
             ...otherUserProfile,
-            followers: (otherUserProfile.followers || []).filter(id => id !== user.uid),
+            followers: (otherUserProfile.followers || []).filter(
+              id => id !== user.uid
+            ),
           });
         }
         if (currentUserProfile) {
           setCurrentUserProfile({
             ...currentUserProfile,
-            following: (currentUserProfile.following || []).filter(id => id !== targetUserId),
+            following: (currentUserProfile.following || []).filter(
+              id => id !== targetUserId
+            ),
           });
         }
       } else {
         // Follow
         await followUser(user.uid, targetUserId);
         setIsFollowingUser(true);
-        
+
         // Update local state
         if (otherUserProfile) {
           setOtherUserProfile({
@@ -188,7 +218,10 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }
     } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to update follow status');
+      const error =
+        err instanceof Error
+          ? err
+          : new Error('Failed to update follow status');
       setError(error);
       throw error;
     } finally {
@@ -211,11 +244,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     clearError,
   };
 
-  return (
-    <UserContext.Provider value={value}>
-      {children}
-    </UserContext.Provider>
-  );
+  return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 };
 
 export const useUser = () => {

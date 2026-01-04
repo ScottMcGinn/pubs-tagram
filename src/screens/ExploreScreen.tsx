@@ -62,10 +62,7 @@ export const ExploreScreen: React.FC = () => {
       activeOpacity={0.8}
     >
       {item.photoUrls && item.photoUrls.length > 0 ? (
-        <Image
-          source={{ uri: item.photoUrls[0] }}
-          style={styles.pubImage}
-        />
+        <Image source={{ uri: item.photoUrls[0] }} style={styles.pubImage} />
       ) : (
         <View style={[styles.pubImage, styles.pubImageEmpty]}>
           <Text style={styles.pubImageEmptyText}>🍺</Text>

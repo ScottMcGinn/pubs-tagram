@@ -32,7 +32,9 @@ export const uploadPubPhoto = async (
     // Upload both images
     await Promise.all([
       photoRef.putString(photoData, 'base64', { contentType: 'image/jpeg' }),
-      thumbnailRef.putString(thumbnailData, 'base64', { contentType: 'image/jpeg' }),
+      thumbnailRef.putString(thumbnailData, 'base64', {
+        contentType: 'image/jpeg',
+      }),
     ]);
 
     // Get download URLs

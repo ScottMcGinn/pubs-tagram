@@ -39,7 +39,7 @@ describe('User Profiles Service', () => {
         displayName: 'Updated Name',
         bio: 'Updated bio',
       };
-      
+
       expect(updates.displayName).toBe('Updated Name');
       expect(updates.bio).toBe('Updated bio');
     });
@@ -47,7 +47,7 @@ describe('User Profiles Service', () => {
     it('preserves uid and email on update', () => {
       const originalUid = mockUserProfile.uid;
       const originalEmail = mockUserProfile.email;
-      
+
       expect(originalUid).toBe('test-user-123');
       expect(originalEmail).toBe('test@example.com');
     });
@@ -57,11 +57,11 @@ describe('User Profiles Service', () => {
     it('filters users by display name', () => {
       const users = [mockUserProfile];
       const searchTerm = 'Test';
-      
+
       const results = users.filter(u =>
         u.displayName.toLowerCase().includes(searchTerm.toLowerCase())
       );
-      
+
       expect(results).toHaveLength(1);
       expect(results[0].displayName).toContain('Test');
     });
@@ -69,11 +69,11 @@ describe('User Profiles Service', () => {
     it('returns empty array for non-matching search', () => {
       const users = [mockUserProfile];
       const searchTerm = 'NonExistent';
-      
+
       const results = users.filter(u =>
         u.displayName.toLowerCase().includes(searchTerm.toLowerCase())
       );
-      
+
       expect(results).toHaveLength(0);
     });
   });
