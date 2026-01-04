@@ -13,11 +13,6 @@ const loadImagePicker = async () => {
   if (!ImagePicker) {
     try {
       ImagePicker = await import('expo-image-picker');
-      // Request permissions
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        throw new Error('Permission to access media library was denied');
-      }
     } catch (error) {
       console.warn('Failed to load ImagePicker:', error);
       throw new Error('Image picker not available');
@@ -29,6 +24,13 @@ const loadImagePicker = async () => {
 // Pick image from camera
 export const pickImageFromCamera = async (): Promise<ImageResult | null> => {
   const picker = await loadImagePicker();
+  
+  // Request camera permissions
+  const cameraPerms = await picker!.requestCameraPermissionsAsync();
+  if (cameraPerms.status !== 'granted') {
+    throw new Error('Camera permission denied');
+  }
+  
   const result = await picker!.launchCameraAsync({
     mediaTypes: picker!.MediaTypeOptions.Images,
     aspect: [4, 3],
@@ -50,6 +52,13 @@ export const pickImageFromCamera = async (): Promise<ImageResult | null> => {
 // Pick image from gallery
 export const pickImageFromGallery = async (): Promise<ImageResult | null> => {
   const picker = await loadImagePicker();
+  
+  // Request media library permissions
+  const libraryPerms = await picker!.requestMediaLibraryPermissionsAsync();
+  if (libraryPerms.status !== 'granted') {
+    throw new Error('Media library permission denied');
+  }
+  
   const result = await picker!.launchImageLibraryAsync({
     mediaTypes: picker!.MediaTypeOptions.Images,
     aspect: [4, 3],
