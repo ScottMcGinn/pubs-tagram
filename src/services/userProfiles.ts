@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { UserProfile } from '../types';
 
-const PROJECT_ID = process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID;
+const PROJECT_ID = process.env.firebase_project_id;
 const FIRESTORE_API_URL = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
 
 // Get ID token from AsyncStorage
@@ -39,7 +39,7 @@ export const createUserProfile = async (
     const now = new Date().toISOString();
 
     const response = await fetch(
-      `${FIRESTORE_API_URL}/users/${uid}?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      `${FIRESTORE_API_URL}/users/${uid}?key=${process.env.firebase_api_key}`,
       {
         method: 'PATCH',
         headers: {
@@ -97,7 +97,7 @@ export const getUserProfile = async (
     const idToken = await getIdToken();
 
     const response = await fetch(
-      `${FIRESTORE_API_URL}/users/${uid}?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      `${FIRESTORE_API_URL}/users/${uid}?key=${process.env.firebase_api_key}`,
       {
         method: 'GET',
         headers: {
@@ -180,7 +180,7 @@ export const updateUserProfile = async (
     }
 
     await fetch(
-      `${FIRESTORE_API_URL}/users/${uid}?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      `${FIRESTORE_API_URL}/users/${uid}?key=${process.env.firebase_api_key}`,
       {
         method: 'PATCH',
         headers: {
@@ -243,7 +243,7 @@ export const searchUsers = async (
     const idToken = await getIdToken();
 
     const response = await fetch(
-      `${FIRESTORE_API_URL}:runQuery?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      `${FIRESTORE_API_URL}:runQuery?key=${process.env.firebase_api_key}`,
       {
         method: 'POST',
         headers: {
@@ -310,7 +310,7 @@ export const getPublicProfiles = async (
     const idToken = await getIdToken();
 
     const response = await fetch(
-      `${FIRESTORE_API_URL}:runQuery?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      `${FIRESTORE_API_URL}:runQuery?key=${process.env.firebase_api_key}`,
       {
         method: 'POST',
         headers: {
@@ -370,7 +370,7 @@ export const followUser = async (
     const followId = `${currentUserId}_${targetUserId}`;
 
     await fetch(
-      `${FIRESTORE_API_URL}/follows/${followId}?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      `${FIRESTORE_API_URL}/follows/${followId}?key=${process.env.firebase_api_key}`,
       {
         method: 'PATCH',
         headers: {
@@ -404,7 +404,7 @@ export const unfollowUser = async (
     const followId = `${currentUserId}_${targetUserId}`;
 
     await fetch(
-      `${FIRESTORE_API_URL}/follows/${followId}?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      `${FIRESTORE_API_URL}/follows/${followId}?key=${process.env.firebase_api_key}`,
       {
         method: 'DELETE',
         headers: {
@@ -430,7 +430,7 @@ export const isFollowing = async (
     const followId = `${currentUserId}_${targetUserId}`;
 
     const response = await fetch(
-      `${FIRESTORE_API_URL}/follows/${followId}?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      `${FIRESTORE_API_URL}/follows/${followId}?key=${process.env.firebase_api_key}`,
       {
         method: 'GET',
         headers: {
@@ -454,7 +454,7 @@ export const getFollowersCount = async (userId: string): Promise<number> => {
     const idToken = await getIdToken();
 
     const response = await fetch(
-      `${FIRESTORE_API_URL}:runQuery?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      `${FIRESTORE_API_URL}:runQuery?key=${process.env.firebase_api_key}`,
       {
         method: 'POST',
         headers: {
@@ -494,7 +494,7 @@ export const getFollowingCount = async (userId: string): Promise<number> => {
     const idToken = await getIdToken();
 
     const response = await fetch(
-      `${FIRESTORE_API_URL}:runQuery?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      `${FIRESTORE_API_URL}:runQuery?key=${process.env.firebase_api_key}`,
       {
         method: 'POST',
         headers: {
@@ -536,7 +536,7 @@ export const getFollowersList = async (
     const idToken = await getIdToken();
 
     const response = await fetch(
-      `${FIRESTORE_API_URL}:runQuery?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      `${FIRESTORE_API_URL}:runQuery?key=${process.env.firebase_api_key}`,
       {
         method: 'POST',
         headers: {
@@ -591,7 +591,7 @@ export const getFollowingList = async (
     const idToken = await getIdToken();
 
     const response = await fetch(
-      `${FIRESTORE_API_URL}:runQuery?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      `${FIRESTORE_API_URL}:runQuery?key=${process.env.firebase_api_key}`,
       {
         method: 'POST',
         headers: {
@@ -648,7 +648,7 @@ export const getSuggestedUsers = async (
 
     // Get all public users
     const usersResponse = await fetch(
-      `${FIRESTORE_API_URL}:runQuery?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      `${FIRESTORE_API_URL}:runQuery?key=${process.env.firebase_api_key}`,
       {
         method: 'POST',
         headers: {
@@ -685,7 +685,7 @@ export const getSuggestedUsers = async (
 
     // Get current user's following list
     const followingResponse = await fetch(
-      `${FIRESTORE_API_URL}:runQuery?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
+      `${FIRESTORE_API_URL}:runQuery?key=${process.env.firebase_api_key}`,
       {
         method: 'POST',
         headers: {
