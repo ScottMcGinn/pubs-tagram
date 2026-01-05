@@ -16,13 +16,13 @@ console.log('[App] Import 5: GestureHandlerRootView loaded');
 import * as Linking from 'expo-linking';
 console.log('[App] Import 6: Linking loaded');
 
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, LinkingOptions } from '@react-navigation/native';
 console.log('[App] Import 7: NavigationContainer loaded');
 
 import * as SplashScreen from 'expo-splash-screen';
 console.log('[App] Import 8: SplashScreen loaded');
 
-const linking = {
+const linking: LinkingOptions<any> = {
   prefixes: [Linking.createURL('/'), 'pubstagram://', 'exp://'],
   config: {
     screens: {
