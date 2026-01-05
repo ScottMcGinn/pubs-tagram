@@ -11,7 +11,8 @@
         "ENVIRONMENT": "development"
       },
       "autoIncrement": false,
-      "node": "18.18.0"
+      "node": "18.18.0",
+      "prebuildCommand": "npx expo prebuild --clean"
     },
     "preview": {
       "distribution": "internal",
@@ -21,14 +22,16 @@
       "env": {
         "ENVIRONMENT": "preview"
       },
-      "autoIncrement": true
+      "autoIncrement": true,
+      "prebuildCommand": "npx expo prebuild --clean"
     },
     "production": {
       "autoIncrement": true,
       "env": {
         "ENVIRONMENT": "production"
       },
-      "node": "18.18.0"
+      "node": "18.18.0",
+      "prebuildCommand": "npx expo prebuild --clean"
     }
   },
   "submit": {

@@ -30,6 +30,18 @@ CNG means the `android/` and `ios/` native folders are **not tracked in git** an
 
 All native customization is done through:
 
+#### EAS Build Configuration (eas.json)
+Each build profile explicitly runs `npx expo prebuild --clean` to ensure native folders are always freshly generated:
+```json
+{
+  "build": {
+    "development": {
+      "prebuildCommand": "npx expo prebuild --clean"
+    }
+  }
+}
+```
+
 #### Plugins (app.json)
 ```json
 {
