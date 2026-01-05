@@ -65,4 +65,6 @@
       "android": {
         "package": "com.pubstagram.app.dev",
         "versionCode": 1
-      }
+      }    }
+  }
+}
