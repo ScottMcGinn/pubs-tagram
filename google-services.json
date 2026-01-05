@@ -1,0 +1,31 @@
+{
+  "project_info": {
+    "project_number": "905466838608",
+    "firebase_url": "https://pubs-tagram.firebaseio.com",
+    "project_id": "pubs-tagram",
+    "storage_bucket": "pubs-tagram.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:905466838608:android:e05a9ebff71807ad93db55",
+        "android_client_info": {
+          "package_name": "com.pubstagram.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBNpryHI5g3-Dl3HcjtALPl8SOkQRQfX0Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
+
