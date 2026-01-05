@@ -3,7 +3,6 @@
     "name": "Pubs-tagram",
     "slug": "pubs-tagram",
     "version": "1.0.0",
-    "buildNumber": "1",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "scheme": "pubstagram",
@@ -23,7 +22,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.pubstagram.app",
-      "versionCode": 2,
+      "versionCode": 7,
       "permissions": [
         "android.permission.INTERNET",
         "android.permission.CAMERA",
@@ -53,17 +52,6 @@
       "buildVariant": "production",
       "versionStrategy": "manual"
     },
-    "runtimeVersion": "1.0.0",
-    "developmentClient": {
-      "ios": {
-        "supportsTablet": true,
-        "bundleIdentifier": "com.pubstagram.app.dev",
-        "buildNumber": "1"
-      },
-      "android": {
-        "package": "com.pubstagram.app.dev",
-        "versionCode": 1
-      }
-    }
+    "runtimeVersion": "1.0.0"
   }
 }
