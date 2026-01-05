@@ -22,7 +22,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.pubstagram.app",
-      "versionCode": 7,
+      "versionCode": 11,
       "permissions": [
         "android.permission.INTERNET",
         "android.permission.CAMERA",
@@ -52,6 +52,9 @@
       "buildVariant": "production",
       "versionStrategy": "manual"
     },
-    "runtimeVersion": "1.0.0"
+    "runtimeVersion": "1.0.0",
+    "updates": {
+      "url": "https://u.expo.dev/be0193c6-e28e-4811-86a1-9cfc5a14f412"
+    }
   }
 }
