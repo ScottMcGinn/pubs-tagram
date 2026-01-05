@@ -55,17 +55,14 @@
     },
     "runtimeVersion": {
       "policy": "sdkVersion"
-    }
-  },
-  "developmentClient": {
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.pubstagram.app.dev",
-      "buildNumber": "1"
     },
-    "android": {
-      "package": "com.pubstagram.app.dev",
-      "versionCode": 1
-    }
-  }
-}
+    "developmentClient": {
+      "ios": {
+        "supportsTablet": true,
+        "bundleIdentifier": "com.pubstagram.app.dev",
+        "buildNumber": "1"
+      },
+      "android": {
+        "package": "com.pubstagram.app.dev",
+        "versionCode": 1
+      }
