@@ -49,7 +49,9 @@ export const createPub = async (
             valueForMoney: { integerValue: pubData.valueForMoney },
             beerQuality: { integerValue: pubData.beerQuality },
             foodQuality: { integerValue: pubData.foodQuality || 0 },
-            visitDate: { timestampValue: pubData.visitDate?.toISOString() || now },
+            visitDate: {
+              timestampValue: pubData.visitDate?.toISOString() || now,
+            },
             photoUrls: {
               arrayValue: {
                 values: pubData.photoUrls.map(url => ({ stringValue: url })),
@@ -221,7 +223,7 @@ export const getExplorePubs = async (
 ): Promise<Pub[]> => {
   try {
     const idToken = await getIdToken();
-    
+
     // Get current user's following list
     const followResponse = await fetch(
       `${FIRESTORE_API_URL}:runQuery?key=${process.env.EXPO_PUBLIC_FIREBASE_API_KEY}`,
@@ -248,7 +250,7 @@ export const getExplorePubs = async (
 
     const followData = await followResponse.json();
     const followingIds = new Set<string>();
-    
+
     if (Array.isArray(followData)) {
       followData.forEach((doc: any) => {
         if (doc.document?.fields?.following?.stringValue) {

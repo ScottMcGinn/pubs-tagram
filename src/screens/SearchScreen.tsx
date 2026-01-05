@@ -167,21 +167,74 @@ export const SearchScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+  bio: {
+    color: '#666',
+    fontSize: 12,
+  },
+  chevron: {
+    color: '#DBDBDB',
+    fontSize: 24,
+    marginLeft: 8,
+  },
+  clearButton: {
+    color: '#8E8E8E',
+    fontSize: 18,
+    paddingLeft: 8,
+  },
   container: {
-    flex: 1,
     backgroundColor: '#FFFFFF',
+    flex: 1,
+  },
+  displayName: {
+    color: '#262626',
+    fontSize: 15,
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+  },
+  emptySubtext: {
+    color: '#8E8E8E',
+    fontSize: 14,
+  },
+  emptyText: {
+    fontSize: 48,
+    marginBottom: 12,
+  },
+  followersCount: {
+    color: '#8E8E8E',
+    fontSize: 12,
+    marginBottom: 4,
   },
   header: {
+    borderBottomColor: '#DBDBDB',
+    borderBottomWidth: 1,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#DBDBDB',
+  },
+  profilePicture: {
+    backgroundColor: '#E5E5EA',
+    borderRadius: 25,
+    height: 50,
+    width: 50,
+  },
+  profilePictureEmpty: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  profilePictureText: {
+    color: '#666',
+    fontSize: 20,
+    fontWeight: 'bold',
   },
   searchContainer: {
-    flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#F0F0F0',
     borderRadius: 20,
+    flexDirection: 'row',
     paddingHorizontal: 12,
     paddingVertical: 8,
   },
@@ -190,79 +243,26 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   searchInput: {
+    color: '#262626',
     flex: 1,
     fontSize: 14,
-    color: '#262626',
     paddingVertical: 4,
   },
-  clearButton: {
-    fontSize: 18,
-    color: '#8E8E8E',
-    paddingLeft: 8,
-  },
   userCard: {
-    flexDirection: 'row',
     alignItems: 'center',
+    borderBottomColor: '#F0F0F0',
+    borderBottomWidth: 1,
+    flexDirection: 'row',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
   },
   userCardContent: {
+    alignItems: 'center',
     flex: 1,
     flexDirection: 'row',
-    alignItems: 'center',
     gap: 12,
-  },
-  profilePicture: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#E5E5EA',
-  },
-  profilePictureEmpty: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  profilePictureText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#666',
   },
   userInfo: {
     flex: 1,
-  },
-  displayName: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#262626',
-    marginBottom: 2,
-  },
-  followersCount: {
-    fontSize: 12,
-    color: '#8E8E8E',
-    marginBottom: 4,
-  },
-  bio: {
-    fontSize: 12,
-    color: '#666',
-  },
-  chevron: {
-    fontSize: 24,
-    color: '#DBDBDB',
-    marginLeft: 8,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  emptyText: {
-    fontSize: 48,
-    marginBottom: 12,
-  },
-  emptySubtext: {
-    fontSize: 14,
-    color: '#8E8E8E',
   },
 });

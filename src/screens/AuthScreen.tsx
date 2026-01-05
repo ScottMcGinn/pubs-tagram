@@ -123,66 +123,66 @@ const AuthScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  icon: {
-    fontSize: 64,
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#262626',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#8E8E8E',
-    marginBottom: 40,
-  },
-  form: {
-    width: '100%',
-    maxWidth: 400,
-  },
-  input: {
-    backgroundColor: '#FAFAFA',
-    borderWidth: 1,
-    borderColor: '#DBDBDB',
-    borderRadius: 8,
-    padding: 15,
-    fontSize: 16,
-    marginBottom: 12,
-    color: '#262626',
-  },
   button: {
+    alignItems: 'center',
     backgroundColor: '#0095F6',
     borderRadius: 8,
-    padding: 15,
-    alignItems: 'center',
-    marginTop: 8,
     marginBottom: 16,
+    marginTop: 8,
+    padding: 15,
   },
   buttonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
   },
+  container: {
+    backgroundColor: '#FFFFFF',
+    flex: 1,
+  },
+  content: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+    padding: 20,
+  },
+  form: {
+    maxWidth: 400,
+    width: '100%',
+  },
+  icon: {
+    fontSize: 64,
+    marginBottom: 20,
+  },
+  input: {
+    backgroundColor: '#FAFAFA',
+    borderColor: '#DBDBDB',
+    borderRadius: 8,
+    borderWidth: 1,
+    color: '#262626',
+    fontSize: 16,
+    marginBottom: 12,
+    padding: 15,
+  },
+  safeArea: {
+    backgroundColor: '#FFFFFF',
+    flex: 1,
+  },
+  subtitle: {
+    color: '#8E8E8E',
+    fontSize: 16,
+    marginBottom: 40,
+  },
   switchText: {
     color: '#0095F6',
     fontSize: 14,
     textAlign: 'center',
+  },
+  title: {
+    color: '#262626',
+    fontSize: 32,
+    fontWeight: 'bold',
+    marginBottom: 8,
   },
 });
 

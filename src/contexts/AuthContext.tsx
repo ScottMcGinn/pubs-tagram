@@ -75,7 +75,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         }
       );
 
-      console.log('[AuthContext] signIn response status:', signInResponse.status);
+      console.log(
+        '[AuthContext] signIn response status:',
+        signInResponse.status
+      );
 
       if (!signInResponse.ok) {
         const error = await signInResponse.json();
@@ -125,7 +128,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         }
       );
 
-      console.log('[AuthContext] signUp response status:', signUpResponse.status);
+      console.log(
+        '[AuthContext] signUp response status:',
+        signUpResponse.status
+      );
 
       if (!signUpResponse.ok) {
         const error = await signUpResponse.json();

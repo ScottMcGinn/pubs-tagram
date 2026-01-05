@@ -117,96 +117,96 @@ export const FollowingListScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 16,
-    marginTop: 24,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5EA',
-  },
   backButton: {
-    width: 44,
+    alignItems: 'center',
     height: 44,
     justifyContent: 'center',
-    alignItems: 'center',
     marginLeft: -8,
+    width: 44,
   },
   backButtonText: {
-    fontSize: 28,
     color: '#007AFF',
+    fontSize: 28,
   },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#000',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  followingCard: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
+  bio: {
+    color: '#666',
+    fontSize: 13,
   },
   cardContent: {
+    alignItems: 'center',
     flex: 1,
     flexDirection: 'row',
-    alignItems: 'center',
   },
-  profilePicture: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    marginRight: 12,
+  chevron: {
+    color: '#999',
+    fontSize: 24,
+    marginLeft: 8,
   },
-  profilePictureEmpty: {
-    backgroundColor: '#E5E5EA',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  profilePictureText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#666',
-  },
-  userInfo: {
+  container: {
+    backgroundColor: '#fff',
     flex: 1,
   },
   displayName: {
+    color: '#000',
     fontSize: 16,
     fontWeight: '600',
-    color: '#000',
     marginBottom: 4,
   },
-  bio: {
-    fontSize: 13,
-    color: '#666',
-  },
-  chevron: {
-    fontSize: 24,
-    color: '#999',
-    marginLeft: 8,
-  },
   emptyContainer: {
+    alignItems: 'center',
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
   },
   emptyText: {
-    fontSize: 16,
     color: '#999',
+    fontSize: 16,
+  },
+  followingCard: {
+    alignItems: 'center',
+    borderBottomColor: '#F0F0F0',
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  header: {
+    alignItems: 'center',
+    borderBottomColor: '#E5E5EA',
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 24,
+    paddingHorizontal: 8,
+    paddingVertical: 16,
+  },
+  headerTitle: {
+    color: '#000',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+  },
+  profilePicture: {
+    borderRadius: 24,
+    height: 48,
+    marginRight: 12,
+    width: 48,
+  },
+  profilePictureEmpty: {
+    alignItems: 'center',
+    backgroundColor: '#E5E5EA',
+    justifyContent: 'center',
+  },
+  profilePictureText: {
+    color: '#666',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  userInfo: {
+    flex: 1,
   },
 });

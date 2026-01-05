@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { UserProfile } from '../../types';
+import { colors } from '../../constants/colors';
 
 interface ProfileHeaderProps {
   profile: UserProfile | null;
@@ -31,7 +32,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   if (loading) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -98,28 +99,17 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 };
 
 const styles = StyleSheet.create({
+  bio: {
+    color: colors.darkGray,
+    fontSize: 14,
+    lineHeight: 20,
+    marginHorizontal: 16,
+    textAlign: 'center',
+  },
   container: {
     alignItems: 'center',
+    backgroundColor: colors.white,
     padding: 16,
-    backgroundColor: '#fff',
-  },
-  pictureContainer: {
-    marginBottom: 16,
-  },
-  profilePicture: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-  },
-  placeholderPicture: {
-    backgroundColor: '#E5E5EA',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  placeholderText: {
-    fontSize: 48,
-    fontWeight: 'bold',
-    color: '#666',
   },
   displayName: {
     fontSize: 24,
@@ -127,51 +117,62 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   email: {
+    color: colors.mediumGray,
     fontSize: 14,
-    color: '#666',
     marginBottom: 16,
   },
-  statsContainer: {
-    flexDirection: 'row',
+  emptyBio: {
+    color: colors.gray,
+    fontSize: 14,
+    fontStyle: 'italic',
+    marginHorizontal: 16,
+    textAlign: 'center',
+  },
+  errorText: {
+    color: colors.error,
+    fontSize: 14,
+  },
+  pictureContainer: {
     marginBottom: 16,
-    justifyContent: 'center',
+  },
+  placeholderPicture: {
     alignItems: 'center',
+    backgroundColor: colors.borderGray,
+    justifyContent: 'center',
+  },
+  placeholderText: {
+    color: colors.mediumGray,
+    fontSize: 48,
+    fontWeight: 'bold',
+  },
+  profilePicture: {
+    borderRadius: 60,
+    height: 120,
+    width: 120,
+  },
+  statDivider: {
+    backgroundColor: colors.placeholderGray,
+    height: 30,
+    width: 1,
   },
   statItem: {
     alignItems: 'center',
     paddingHorizontal: 20,
   },
-  statNumber: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#262626',
-  },
   statLabel: {
+    color: colors.mutedGray,
     fontSize: 12,
-    color: '#8E8E8E',
     marginTop: 4,
   },
-  statDivider: {
-    width: 1,
-    height: 30,
-    backgroundColor: '#DBDBDB',
+  statNumber: {
+    color: colors.darkCharcoal,
+    fontSize: 16,
+    fontWeight: 'bold',
   },
-  bio: {
-    fontSize: 14,
-    color: '#333',
-    textAlign: 'center',
-    marginHorizontal: 16,
-    lineHeight: 20,
-  },
-  emptyBio: {
-    fontSize: 14,
-    color: '#999',
-    textAlign: 'center',
-    marginHorizontal: 16,
-    fontStyle: 'italic',
-  },
-  errorText: {
-    fontSize: 14,
-    color: '#FF3B30',
+  statsContainer: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 16,
   },
 });

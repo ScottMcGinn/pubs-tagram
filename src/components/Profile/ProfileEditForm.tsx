@@ -11,6 +11,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { UserProfile } from '../../types';
+import { colors } from '../../constants/colors';
 
 interface ProfileEditFormProps {
   profile: UserProfile;
@@ -107,65 +108,65 @@ export const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  content: {
-    padding: 16,
-  },
-  errorContainer: {
-    backgroundColor: '#FFE5E5',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
-  },
-  errorText: {
-    color: '#FF3B30',
-    fontSize: 14,
-  },
-  section: {
-    marginBottom: 24,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 8,
-  },
-  input: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 14,
-    borderWidth: 1,
-    borderColor: '#E5E5EA',
-  },
   bioInput: {
     height: 100,
     textAlignVertical: 'top',
   },
   charCount: {
+    color: colors.gray,
     fontSize: 12,
-    color: '#999',
     marginTop: 6,
     textAlign: 'right',
   },
-  saveButton: {
-    backgroundColor: '#007AFF',
+  container: {
+    backgroundColor: colors.lightGray,
+    flex: 1,
+  },
+  content: {
+    padding: 16,
+  },
+  errorContainer: {
+    backgroundColor: colors.errorLight,
     borderRadius: 8,
-    paddingVertical: 12,
+    marginBottom: 16,
+    padding: 12,
+  },
+  errorText: {
+    color: colors.error,
+    fontSize: 14,
+  },
+  input: {
+    backgroundColor: colors.white,
+    borderColor: colors.borderGray,
+    borderRadius: 8,
+    borderWidth: 1,
+    fontSize: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  label: {
+    color: colors.darkGray,
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  saveButton: {
     alignItems: 'center',
+    backgroundColor: colors.primary,
+    borderRadius: 8,
     marginTop: 24,
+    paddingVertical: 12,
   },
   saveButtonDisabled: {
-    backgroundColor: '#CCCCCC',
+    backgroundColor: colors.disabled,
     opacity: 0.6,
   },
   saveButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 16,
     fontWeight: '600',
+  },
+  section: {
+    marginBottom: 24,
   },
 });

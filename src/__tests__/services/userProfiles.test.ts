@@ -175,10 +175,7 @@ describe('User Profiles REST API Service', () => {
       (fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => ({
-          documents: [
-            { name: 'following-1' },
-            { name: 'following-2' },
-          ],
+          documents: [{ name: 'following-1' }, { name: 'following-2' }],
         }),
       });
 
@@ -218,21 +215,20 @@ describe('User Profiles REST API Service', () => {
 
   describe('getSuggestedUsers', () => {
     it('should return suggested users', async () => {
-      (fetch as jest.Mock)
-        .mockResolvedValueOnce({
-          ok: true,
-          json: async () => ({
-            documents: [
-              {
-                name: `projects/${mockUserId}/databases/(default)/documents/users/suggested-user-1`,
-                fields: {
-                  displayName: { stringValue: 'Suggested User' },
-                  isPublic: { booleanValue: true },
-                },
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          documents: [
+            {
+              name: `projects/${mockUserId}/databases/(default)/documents/users/suggested-user-1`,
+              fields: {
+                displayName: { stringValue: 'Suggested User' },
+                isPublic: { booleanValue: true },
               },
-            ],
-          }),
-        });
+            },
+          ],
+        }),
+      });
 
       expect(fetch).not.toHaveBeenCalled();
     });

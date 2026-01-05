@@ -11,6 +11,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useFocusEffect } from '@react-navigation/native';
+import * as Updates from 'expo-updates';
 import { useUser } from '../contexts/UserContext';
 import { useAuth } from '../contexts/AuthContext';
 import {
@@ -21,6 +22,8 @@ import {
 import { ProfileHeader } from '../components/Profile/ProfileHeader';
 import { ProfilePictureUpload } from '../components/Profile/ProfilePictureUpload';
 import { ProfileEditForm } from '../components/Profile/ProfileEditForm';
+import { AppVersionInfo } from '../components/app-version-info';
+import { UpdatePrompt } from '../components/update-prompt';
 import { UserProfile, RootStackParamList } from '../types';
 
 type ProfileScreenNavigationProp = StackNavigationProp<
@@ -46,6 +49,10 @@ export const ProfileScreen: React.FC = () => {
   const [isInitializing, setIsInitializing] = useState(true);
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
+  const [updateAvailable, setUpdateAvailable] = useState(false);
+  const [isCheckingUpdates, setIsCheckingUpdates] = useState(false);
+  const [showUpdatePrompt, setShowUpdatePrompt] = useState(false);
+  const [lastChecked, setLastChecked] = useState<Date | undefined>();
 
   const loadFollowCounts = async () => {
     if (!user?.uid) return;
@@ -56,6 +63,45 @@ export const ProfileScreen: React.FC = () => {
       setFollowingCount(following);
     } catch (error) {
       console.error('Error loading follow counts:', error);
+    }
+  };
+
+  const checkForUpdates = async () => {
+    setIsCheckingUpdates(true);
+    try {
+      const update = await Updates.checkForUpdateAsync();
+      setLastChecked(new Date());
+
+      if (update.isAvailable) {
+        setUpdateAvailable(true);
+        setShowUpdatePrompt(true);
+      } else {
+        Alert.alert('No Updates', 'Your app is up to date!');
+      }
+    } catch (error) {
+      console.error('[ProfileScreen] Error checking for updates:', error);
+      Alert.alert(
+        'Update Check Failed',
+        'Unable to check for updates at this time.'
+      );
+    } finally {
+      setIsCheckingUpdates(false);
+    }
+  };
+
+  const handleApplyUpdate = async () => {
+    try {
+      setIsCheckingUpdates(true);
+      await Updates.reloadAsync();
+    } catch (error) {
+      console.error('[ProfileScreen] Error applying update:', error);
+      Alert.alert(
+        'Update Failed',
+        'Unable to apply update. Please try again later.'
+      );
+    } finally {
+      setIsCheckingUpdates(false);
+      setShowUpdatePrompt(false);
     }
   };
 
@@ -188,6 +234,15 @@ export const ProfileScreen: React.FC = () => {
                 <Text style={styles.logoutButtonText}>Logout</Text>
               </TouchableOpacity>
             </View>
+
+            <View style={{ paddingHorizontal: 16 }}>
+              <AppVersionInfo
+                updateAvailable={updateAvailable}
+                isCheckingUpdates={isCheckingUpdates}
+                onCheckUpdates={checkForUpdates}
+                lastChecked={lastChecked}
+              />
+            </View>
           </>
         )}
 
@@ -221,54 +276,45 @@ export const ProfileScreen: React.FC = () => {
           </>
         )}
       </ScrollView>
+
+      <UpdatePrompt
+        visible={showUpdatePrompt}
+        onDismiss={() => setShowUpdatePrompt(false)}
+        onUpdate={handleApplyUpdate}
+        isLoading={isCheckingUpdates}
+      />
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 50,
-  },
-  errorContainer: {
-    backgroundColor: '#FFE5E5',
-    borderRadius: 8,
-    padding: 12,
-    marginHorizontal: 16,
-    marginVertical: 12,
-  },
-  errorText: {
-    color: '#FF3B30',
-    fontSize: 14,
-  },
   buttonContainer: {
-    padding: 16,
     gap: 12,
+    padding: 16,
   },
-  editButton: {
-    backgroundColor: '#007AFF',
-    borderRadius: 8,
-    paddingVertical: 12,
+  cancelButton: {
     alignItems: 'center',
+    backgroundColor: '#999',
+    borderRadius: 8,
+    marginTop: 16,
+    paddingVertical: 12,
   },
-  editButtonText: {
+  cancelButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
   },
-  logoutButton: {
-    backgroundColor: '#FF3B30',
+  container: {
+    backgroundColor: '#f5f5f5',
+    flex: 1,
+  },
+  editButton: {
+    alignItems: 'center',
+    backgroundColor: '#007AFF',
     borderRadius: 8,
     paddingVertical: 12,
-    alignItems: 'center',
   },
-  logoutButtonText: {
+  editButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
@@ -276,14 +322,30 @@ const styles = StyleSheet.create({
   editContent: {
     padding: 16,
   },
-  cancelButton: {
-    backgroundColor: '#999',
+  errorContainer: {
+    backgroundColor: '#FFE5E5',
+    borderRadius: 8,
+    marginHorizontal: 16,
+    marginVertical: 12,
+    padding: 12,
+  },
+  errorText: {
+    color: '#FF3B30',
+    fontSize: 14,
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+    paddingVertical: 50,
+  },
+  logoutButton: {
+    alignItems: 'center',
+    backgroundColor: '#FF3B30',
     borderRadius: 8,
     paddingVertical: 12,
-    alignItems: 'center',
-    marginTop: 16,
   },
-  cancelButtonText: {
+  logoutButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',

@@ -1,23 +1,63 @@
 import React from 'react';
 console.log('[App] Import 1: React loaded');
 
-import { NavigationContainer } from '@react-navigation/native';
-console.log('[App] Import 2: NavigationContainer loaded');
+import { View, Text, ScrollView } from 'react-native';
+console.log('[App] Import 2: React Native components loaded');
+
+import * as Updates from 'expo-updates';
+console.log('[App] Import 3: Expo Updates loaded');
 
 import { StatusBar } from 'expo-status-bar';
-console.log('[App] Import 3: StatusBar loaded');
+console.log('[App] Import 4: StatusBar loaded');
 
-import { AuthProvider } from './src/contexts/AuthContext';
-console.log('[App] Import 4: AuthProvider loaded');
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+console.log('[App] Import 5: GestureHandlerRootView loaded');
 
-import { UserProvider } from './src/contexts/UserContext';
-console.log('[App] Import 5: UserProvider loaded');
+import * as Linking from 'expo-linking';
+console.log('[App] Import 6: Linking loaded');
 
-import AppNavigator from './src/navigation/AppNavigator';
-console.log('[App] Import 6: AppNavigator loaded');
+import { NavigationContainer } from '@react-navigation/native';
+console.log('[App] Import 7: NavigationContainer loaded');
 
-import { View, Text, ScrollView } from 'react-native';
-console.log('[App] Import 7: React Native components loaded');
+import * as SplashScreen from 'expo-splash-screen';
+console.log('[App] Import 8: SplashScreen loaded');
+
+const linking = {
+  prefixes: [Linking.createURL('/'), 'pubstagram://', 'exp://'],
+  config: {
+    screens: {
+      '(tabs)': {
+        screens: {
+          index: 'feed',
+          profile: 'profile',
+        },
+      },
+      '(stack)': {
+        screens: {
+          'add-pub': 'add-pub',
+          'pub-detail': 'pub-detail/:pubId',
+          search: 'search',
+          'user-profile': 'user/:userId',
+          'followers-list': 'followers/:userId',
+          'following-list': 'following/:userId',
+          discover: 'discover',
+          explore: 'explore',
+        },
+      },
+    },
+  },
+};
+
+// Catch errors at module import time
+console.log('[App] App.tsx module loading');
+
+try {
+  console.log('[App] Importing services...');
+  require('./src/services/firebase');
+  console.log('[App] Firebase service imported');
+} catch (error: any) {
+  console.error('[App] FAILED to import Firebase:', error?.message);
+}
 
 // Catch errors at module import time
 console.log('[App] App.tsx module loading');
@@ -74,27 +114,61 @@ class ErrorBoundary extends React.Component<any, { hasError: boolean; error: Err
 
 function AppContent() {
   console.log('[App] AppContent rendering');
-  
+
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={linking} fallback={<View />}>
       <StatusBar style="auto" />
-      <AppNavigator />
     </NavigationContainer>
   );
 }
 
+// Component to handle Expo Updates initialization and periodic checks
+function UpdatesWrapper({ children }: { children: React.ReactNode }) {
+  React.useEffect(() => {
+    const checkForUpdates = async () => {
+      try {
+        console.log('[Updates] Checking for updates...');
+        const update = await Updates.checkForUpdateAsync();
+
+        if (update.isAvailable) {
+          console.log('[Updates] Update available, fetching...');
+          await Updates.fetchUpdateAsync();
+
+          // Notify the app that an update is available
+          // This can be accessed via a context or event listener
+          console.log('[Updates] Update fetched successfully');
+        } else {
+          console.log('[Updates] App is up to date');
+        }
+      } catch (error) {
+        console.error('[Updates] Error checking for updates:', error);
+      }
+    };
+
+    // Check for updates on app startup
+    checkForUpdates();
+
+    // Optionally set up periodic checks (every 60 minutes)
+    const checkInterval = setInterval(checkForUpdates, 60 * 60 * 1000);
+
+    return () => clearInterval(checkInterval);
+  }, []);
+
+  return <>{children}</>;
+}
+
 export default function App() {
   console.log('[App] App component rendering');
-  
+
   try {
     return (
-      <ErrorBoundary>
-        <AuthProvider>
-          <UserProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <ErrorBoundary>
+          <UpdatesWrapper>
             <AppContent />
-          </UserProvider>
-        </AuthProvider>
-      </ErrorBoundary>
+          </UpdatesWrapper>
+        </ErrorBoundary>
+      </GestureHandlerRootView>
     );
   } catch (error: any) {
     console.error('[App] Top-level render error:', error);

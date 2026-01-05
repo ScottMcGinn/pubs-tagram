@@ -27,16 +27,16 @@ const BeerGlassRating: React.FC<BeerGlassRatingProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    justifyContent: 'center',
     alignItems: 'center',
+    flexDirection: 'row',
     gap: 8,
-  },
-  glassButton: {
-    padding: 4,
+    justifyContent: 'center',
   },
   glass: {
     fontSize: 32,
+  },
+  glassButton: {
+    padding: 4,
   },
 });
 

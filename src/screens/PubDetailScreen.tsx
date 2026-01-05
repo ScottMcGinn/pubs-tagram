@@ -458,101 +458,19 @@ const PubDetailScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#DBDBDB',
-  },
   backButton: {
+    color: '#262626',
     fontSize: 28,
-    color: '#262626',
   },
-  menuButton: {
-    fontSize: 28,
-    color: '#262626',
-  },
-  deletingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  deletingText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: '#8E8E8E',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-    paddingBottom: 50,
-  },
-  menuContainer: {
-    backgroundColor: '#FFFFFF',
-    marginHorizontal: 16,
-    borderRadius: 12,
-    overflow: 'hidden',
-  },
-  menuItem: {
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#DBDBDB',
-  },
-  menuItemText: {
-    fontSize: 16,
-    color: '#262626',
-    textAlign: 'center',
-  },
-  menuItemTextDelete: {
-    fontSize: 16,
-    color: '#FF3B30',
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  confirmOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  confirmDialog: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 20,
-    maxWidth: 400,
-    width: '100%',
-  },
-  confirmTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#262626',
-    marginBottom: 12,
-    textAlign: 'center',
-  },
-  confirmMessage: {
-    fontSize: 14,
-    color: '#8E8E8E',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  confirmButtons: {
-    flexDirection: 'row',
-    gap: 12,
+  chevron: {
+    color: '#DBDBDB',
+    fontSize: 20,
   },
   confirmButton: {
+    alignItems: 'center',
+    borderRadius: 8,
     flex: 1,
     padding: 12,
-    borderRadius: 8,
-    alignItems: 'center',
   },
   confirmButtonCancel: {
     backgroundColor: '#F0F0F0',
@@ -561,74 +479,176 @@ const styles = StyleSheet.create({
     backgroundColor: '#FF3B30',
   },
   confirmButtonText: {
+    color: '#262626',
     fontSize: 16,
     fontWeight: '600',
-    color: '#262626',
   },
   confirmButtonTextDelete: {
     color: '#FFFFFF',
   },
+  confirmButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  confirmDialog: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    maxWidth: 400,
+    padding: 20,
+    width: '100%',
+  },
+  confirmMessage: {
+    color: '#8E8E8E',
+    fontSize: 14,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  confirmOverlay: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    flex: 1,
+    justifyContent: 'center',
+    padding: 20,
+  },
+  confirmTitle: {
+    color: '#262626',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  container: {
+    backgroundColor: '#FFFFFF',
+    flex: 1,
+  },
   content: {
     flex: 1,
   },
-  userHeader: {
-    flexDirection: 'row',
+  deletingContainer: {
     alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+  },
+  deletingText: {
+    color: '#8E8E8E',
+    fontSize: 16,
+    marginTop: 16,
+  },
+  dislikeButton: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 12,
+    paddingVertical: 8,
+  },
+  divider: {
+    backgroundColor: '#DBDBDB',
+    height: 1,
+    marginHorizontal: 16,
+  },
+  dot: {
+    backgroundColor: '#DBDBDB',
+    borderRadius: 4,
+    height: 8,
+    marginHorizontal: 4,
+    width: 8,
+  },
+  dotActive: {
+    backgroundColor: '#0095F6',
+  },
+  dotsContainer: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    paddingVertical: 12,
+  },
+  header: {
+    alignItems: 'center',
+    borderBottomColor: '#DBDBDB',
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#DBDBDB',
   },
-  userProfilePicture: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#DBDBDB',
-    marginRight: 12,
+  infoSection: {
+    padding: 16,
   },
-  userProfilePictureEmpty: {
-    justifyContent: 'center',
+  likeButton: {
     alignItems: 'center',
+    flexDirection: 'row',
+    gap: 12,
+    paddingVertical: 8,
   },
-  userProfilePictureText: {
-    fontSize: 24,
-  },
-  userInfo: {
-    flex: 1,
-  },
-  userName: {
-    fontSize: 15,
-    fontWeight: '600',
+  likeText: {
     color: '#262626',
-    marginBottom: 2,
+    fontSize: 16,
+    fontWeight: '500',
   },
-  visitedLabel: {
-    fontSize: 13,
+  likesContainer: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 16,
+    paddingVertical: 8,
+  },
+  location: {
     color: '#8E8E8E',
+    fontSize: 16,
   },
-  chevron: {
-    fontSize: 20,
-    color: '#DBDBDB',
+  menuButton: {
+    color: '#262626',
+    fontSize: 28,
   },
-  photoGalleryContainer: {
-    height: 400,
-    position: 'relative',
-    backgroundColor: '#FAFAFA',
+  menuContainer: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    marginHorizontal: 16,
+    overflow: 'hidden',
+  },
+  menuItem: {
+    borderBottomColor: '#DBDBDB',
+    borderBottomWidth: 1,
+    padding: 16,
+  },
+  menuItemText: {
+    color: '#262626',
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  menuItemTextDelete: {
+    color: '#FF3B30',
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  metadata: {
+    color: '#8E8E8E',
+    fontSize: 14,
+  },
+  modalOverlay: {
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    flex: 1,
+    justifyContent: 'flex-end',
+    paddingBottom: 50,
   },
   photo: {
-    width: '100%',
     height: 400,
+    width: '100%',
+  },
+  photoGalleryContainer: {
+    backgroundColor: '#FAFAFA',
+    height: 400,
+    position: 'relative',
   },
   photoNavButton: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: 25,
+    height: 50,
+    justifyContent: 'center',
     position: 'absolute',
     top: '50%',
     transform: [{ translateY: -25 }],
     width: 50,
-    height: 50,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    borderRadius: 25,
-    justifyContent: 'center',
-    alignItems: 'center',
     zIndex: 10,
   },
   photoNavButtonLeft: {
@@ -642,100 +662,80 @@ const styles = StyleSheet.create({
     fontSize: 36,
     fontWeight: 'bold',
   },
-  dotsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 12,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#DBDBDB',
-    marginHorizontal: 4,
-  },
-  dotActive: {
-    backgroundColor: '#0095F6',
-  },
-  infoSection: {
-    padding: 16,
-  },
   pubName: {
+    color: '#262626',
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#262626',
     marginBottom: 4,
   },
-  location: {
-    fontSize: 16,
-    color: '#8E8E8E',
-  },
-  divider: {
-    height: 1,
-    backgroundColor: '#DBDBDB',
-    marginHorizontal: 16,
-  },
-  section: {
-    padding: 16,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#262626',
-    marginBottom: 8,
-  },
-  sectionContent: {
-    fontSize: 16,
-    color: '#262626',
-  },
-  ratingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  ratingLabel: {
-    fontSize: 16,
-    color: '#262626',
-    marginRight: 8,
-    minWidth: 140,
+  ratingIcon: {
+    fontSize: 20,
   },
   ratingIcons: {
     flexDirection: 'row',
     gap: 4,
   },
-  ratingIcon: {
-    fontSize: 20,
+  ratingLabel: {
+    color: '#262626',
+    fontSize: 16,
+    marginRight: 8,
+    minWidth: 140,
   },
-  metadata: {
-    fontSize: 14,
-    color: '#8E8E8E',
-  },
-  likesContainer: {
-    flexDirection: 'row',
+  ratingRow: {
     alignItems: 'center',
-    gap: 16,
-    paddingVertical: 8,
-  },
-  likeButton: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingVertical: 8,
+    marginBottom: 8,
   },
-  dislikeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingVertical: 8,
+  section: {
+    padding: 16,
+  },
+  sectionContent: {
+    color: '#262626',
+    fontSize: 16,
+  },
+  sectionTitle: {
+    color: '#262626',
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 8,
   },
   thumbIcon: {
     fontSize: 24,
   },
-  likeText: {
-    fontSize: 16,
+  userHeader: {
+    alignItems: 'center',
+    borderBottomColor: '#DBDBDB',
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  userInfo: {
+    flex: 1,
+  },
+  userName: {
     color: '#262626',
-    fontWeight: '500',
+    fontSize: 15,
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  userProfilePicture: {
+    backgroundColor: '#DBDBDB',
+    borderRadius: 22,
+    height: 44,
+    marginRight: 12,
+    width: 44,
+  },
+  userProfilePictureEmpty: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  userProfilePictureText: {
+    fontSize: 24,
+  },
+  visitedLabel: {
+    color: '#8E8E8E',
+    fontSize: 13,
   },
 });
 

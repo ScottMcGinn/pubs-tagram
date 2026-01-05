@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -15,10 +15,11 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
 import { useAuth } from '../contexts/AuthContext';
-import RatingComponent from '../components/RatingComponent';
+import RatingComponent from '../components/rating-component';
 import { pickImageFromGallery } from '../utils/imageHelpers';
 import { uploadPubPhoto } from '../services/storage';
 import { createPub } from '../services/firestore';
+import { colors } from '../constants/colors';
 
 type AddPubScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -32,7 +33,7 @@ interface PhotoData {
 const AddPubScreen = () => {
   const navigation = useNavigation<AddPubScreenNavigationProp>();
   const { user } = useAuth();
-  const fileInputRef = useRef<any>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [pubName, setPubName] = useState('');
   const [location, setLocation] = useState('');
@@ -43,7 +44,6 @@ const AddPubScreen = () => {
   const [foodQuality, setFoodQuality] = useState(0); // 0 means not rated
   const [photos, setPhotos] = useState<PhotoData[]>([]);
   const [loading, setLoading] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
 
   const handleFilesAdded = (files: FileList | File[]) => {
     const fileArray = Array.from(files);
@@ -69,7 +69,7 @@ const AddPubScreen = () => {
     }
   };
 
-  const handleFileInputChange = (e: any) => {
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       handleFilesAdded(e.target.files);
     }
@@ -151,9 +151,11 @@ const AddPubScreen = () => {
       });
 
       navigation.goBack();
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to save pub';
       console.error('Full error:', error);
-      alert('Error: ' + (error.message || 'Failed to save pub'));
+      alert('Error: ' + errorMessage);
     } finally {
       setLoading(false);
     }
@@ -309,141 +311,141 @@ const AddPubScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  addPhotoButton: {
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#DBDBDB',
+    backgroundColor: colors.lightBackground,
+    borderColor: colors.placeholderGray,
+    borderRadius: 8,
+    borderStyle: 'dashed',
+    borderWidth: 2,
+    height: 100,
+    justifyContent: 'center',
+    width: 100,
   },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#262626',
+  addPhotoButtonDragging: {
+    backgroundColor: colors.lightBlue,
+    borderColor: colors.instagramBlue,
+  },
+  addPhotoHint: {
+    color: colors.mutedGray,
+    fontSize: 10,
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  addPhotoText: {
+    color: colors.mutedGray,
+    fontSize: 32,
   },
   cancelButton: {
+    color: colors.darkCharcoal,
     fontSize: 24,
-    color: '#262626',
     width: 30,
   },
-  saveButton: {
-    fontSize: 24,
-    color: '#0095F6',
-    fontWeight: 'bold',
-    width: 30,
+  container: {
+    backgroundColor: colors.white,
+    flex: 1,
   },
   content: {
     flex: 1,
     padding: 16,
   },
-  section: {
-    marginBottom: 24,
-    position: 'relative',
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#262626',
-    marginBottom: 8,
-  },
-  input: {
-    backgroundColor: '#FAFAFA',
-    borderWidth: 1,
-    borderColor: '#DBDBDB',
+  dragOverlay: {
+    alignItems: 'center',
+    backgroundColor: colors.instagramBlueLight,
     borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    color: '#262626',
+    bottom: 8,
+    justifyContent: 'center',
+    left: 8,
+    pointerEvents: 'none',
+    position: 'absolute',
+    right: 8,
+    top: 8,
+  },
+  dragOverlayText: {
+    color: colors.instagramBlue,
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  header: {
+    alignItems: 'center',
+    borderBottomColor: colors.placeholderGray,
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  headerTitle: {
+    color: colors.darkCharcoal,
+    fontSize: 18,
+    fontWeight: '600',
   },
   hint: {
+    color: colors.mutedGray,
     fontSize: 12,
-    color: '#8E8E8E',
     marginTop: 4,
+  },
+  input: {
+    backgroundColor: colors.lightBackground,
+    borderColor: colors.placeholderGray,
+    borderRadius: 8,
+    borderWidth: 1,
+    color: colors.darkCharcoal,
+    fontSize: 16,
+    padding: 12,
+  },
+  label: {
+    color: colors.darkCharcoal,
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  photo: {
+    borderRadius: 8,
+    height: 100,
+    width: 100,
+  },
+  photoContainer: {
+    height: 100,
+    position: 'relative',
+    width: 100,
   },
   photoGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 12,
   },
-  photoContainer: {
-    width: 100,
-    height: 100,
-    position: 'relative',
-  },
-  photo: {
-    width: 100,
-    height: 100,
-    borderRadius: 8,
+  ratingHint: {
+    color: colors.mutedGray,
+    fontSize: 14,
+    marginTop: 8,
+    textAlign: 'center',
   },
   removeButton: {
-    position: 'absolute',
-    top: -8,
-    right: -8,
-    backgroundColor: '#FF3B30',
+    alignItems: 'center',
+    backgroundColor: colors.error,
     borderRadius: 12,
-    width: 24,
     height: 24,
     justifyContent: 'center',
-    alignItems: 'center',
+    position: 'absolute',
+    right: -8,
+    top: -8,
+    width: 24,
   },
   removeButtonText: {
-    color: '#FFFFFF',
+    color: colors.white,
     fontSize: 14,
     fontWeight: 'bold',
   },
-  addPhotoButton: {
-    width: 100,
-    height: 100,
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: '#DBDBDB',
-    borderStyle: 'dashed',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#FAFAFA',
+  saveButton: {
+    color: colors.instagramBlue,
+    fontSize: 24,
+    fontWeight: 'bold',
+    width: 30,
   },
-  addPhotoButtonDragging: {
-    borderColor: '#0095F6',
-    backgroundColor: '#F0F8FF',
-  },
-  addPhotoText: {
-    fontSize: 32,
-    color: '#8E8E8E',
-  },
-  addPhotoHint: {
-    fontSize: 10,
-    color: '#8E8E8E',
-    marginTop: 4,
-    textAlign: 'center',
-  },
-  dragOverlay: {
-    position: 'absolute',
-    top: 8,
-    left: 8,
-    right: 8,
-    bottom: 8,
-    backgroundColor: 'rgba(0, 149, 246, 0.1)',
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    pointerEvents: 'none',
-  },
-  dragOverlayText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#0095F6',
-  },
-  ratingHint: {
-    textAlign: 'center',
-    marginTop: 8,
-    fontSize: 14,
-    color: '#8E8E8E',
+  section: {
+    marginBottom: 24,
+    position: 'relative',
   },
 });
 

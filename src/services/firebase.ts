@@ -10,4 +10,3 @@ export const FIREBASE_CONFIG = {
 
 export const FIRESTORE_API_URL = `https://firestore.googleapis.com/v1/projects/${FIREBASE_CONFIG.projectId}/databases/(default)/documents`;
 export const STORAGE_API_URL = `https://storage.googleapis.com/storage/v1/b/${FIREBASE_CONFIG.storageBucket}`;
-

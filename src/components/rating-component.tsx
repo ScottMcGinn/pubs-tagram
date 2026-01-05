@@ -31,16 +31,16 @@ const RatingComponent: React.FC<RatingComponentProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    justifyContent: 'center',
     alignItems: 'center',
+    flexDirection: 'row',
     gap: 8,
-  },
-  iconButton: {
-    padding: 4,
+    justifyContent: 'center',
   },
   icon: {
     fontSize: 32,
+  },
+  iconButton: {
+    padding: 4,
   },
 });
 

@@ -3,8 +3,10 @@
     "name": "Pubs-tagram",
     "slug": "pubs-tagram",
     "version": "1.0.0",
+    "buildNumber": "1",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
+    "scheme": "pubstagram",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -12,7 +14,8 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.pubstagram.app"
+      "bundleIdentifier": "com.pubstagram.app",
+      "buildNumber": "1"
     },
     "android": {
       "adaptiveIcon": {
@@ -20,6 +23,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.pubstagram.app",
+      "versionCode": 1,
       "permissions": [
         "android.permission.INTERNET",
         "android.permission.CAMERA",
@@ -34,12 +38,34 @@
           "photosPermission": "Allow Pubs-tagram to access your photos to add pub pictures.",
           "cameraPermission": "Allow Pubs-tagram to use your camera to take pub pictures."
         }
+      ],
+      [
+        "expo-updates"
+      ],
+      [
+        "expo-router"
       ]
     ],
     "extra": {
       "eas": {
         "projectId": "be0193c6-e28e-4811-86a1-9cfc5a14f412"
-      }
+      },
+      "buildVariant": "production",
+      "versionStrategy": "manual"
+    },
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    }
+  },
+  "developmentClient": {
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.pubstagram.app.dev",
+      "buildNumber": "1"
+    },
+    "android": {
+      "package": "com.pubstagram.app.dev",
+      "versionCode": 1
     }
   }
 }

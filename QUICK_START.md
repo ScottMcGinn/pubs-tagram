@@ -27,6 +27,24 @@ npm install
 
 This will take a few minutes to download all dependencies.
 
+#### Important: Using `npx expo install`
+
+For **Expo packages only**, use `npx expo install` instead of `npm install`. This ensures SDK-compatible versions:
+
+```bash
+# ✅ CORRECT for Expo packages
+npx expo install expo-router
+npx expo install expo-updates
+npx expo install @react-navigation/native
+
+# ❌ DO NOT use npm install for Expo packages
+npm install expo-router  # This may install wrong version!
+```
+
+**Why?** The `npx expo install` command checks your SDK version (54) and installs compatible package versions. Regular `npm install` might install the latest version, which could be incompatible.
+
+See [BUILD_PROCESS.md](BUILD_PROCESS.md) and [DEPENDENCY_SETUP.ps1](DEPENDENCY_SETUP.ps1) for complete dependency reference.
+
 ### 3. Set Up Firebase
 
 #### Create Firebase Project:
@@ -87,9 +105,36 @@ Once the app is running:
 ## What Works Right Now
 
 ✅ Authentication (Sign Up / Sign In / Sign Out)
-✅ Basic navigation between screens
-✅ Empty Feed screen with + button
-✅ Placeholder Add Pub and Detail screens
+✅ File-based routing with Expo Router
+✅ Navigation between screens
+✅ Development and production build variants
+✅ Over-the-air update system
+✅ Placeholder screens for all features
+
+## Getting to Production
+
+### Option A: Keep Using Expo Go (Quick Development)
+The current setup works with Expo Go (the app you installed on your phone). Great for rapid prototyping and quick testing.
+
+### Option B: Use Development Builds (Production-Ready - Recommended)
+For a more production-like experience, transition to development builds:
+
+```bash
+# 1. Install Expo CLI
+npm install -g eas-cli
+
+# 2. Login to Expo
+eas login
+
+# 3. Create development build
+eas build --platform android --profile development --local
+```
+
+See [DEVELOPMENT_BUILDS.md](DEVELOPMENT_BUILDS.md) for the complete guide on:
+- Differences between Expo Go and dev builds
+- Setting up dev builds locally
+- Building for production
+- Troubleshooting builds
 
 ## What's Next
 
@@ -98,6 +143,7 @@ Once you confirm everything is running, we'll build:
 2. The Feed display (showing actual pub entries)
 3. The Detail view
 4. Delete functionality
+5. User profiles and social features
 
 ## Troubleshooting
 

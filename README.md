@@ -96,8 +96,32 @@ See [FIRESTORE_RULES_DEPLOYMENT.md](FIRESTORE_RULES_DEPLOYMENT.md) for detailed 
 
 ### Step 4: Run the App
 
+#### Using Expo Go (Quick Development)
 ```bash
 npm start
+```
+Scan the QR code with Expo Go app on your phone.
+
+#### Using Development Builds (Production-Ready)
+Development builds are recommended for production apps and provide full native SDK access:
+
+```bash
+# One-time setup
+npm install -g eas-cli
+eas login
+
+# Build development app
+eas build --platform android --profile development --local
+
+# Then run dev server
+npm start
+```
+
+See [DEVELOPMENT_BUILDS.md](DEVELOPMENT_BUILDS.md) for complete guide including:
+- Differences between Expo Go and dev builds
+- Setting up builds for iOS/Android
+- Build profiles (development, preview, production)
+- Troubleshooting
 ```
 
 Then:

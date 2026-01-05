@@ -8,6 +8,7 @@ import {
   Image,
   Alert,
 } from 'react-native';
+import { colors } from '../../constants/colors';
 
 // Lazy load ImagePicker to prevent app crash if native module is unavailable
 let ImagePicker: typeof import('expo-image-picker') | null = null;
@@ -132,7 +133,7 @@ export const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
   if (isUploading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <ActivityIndicator size="large" color={colors.primary} />
         <Text style={styles.loadingText}>Uploading photo...</Text>
       </View>
     );
@@ -186,9 +187,42 @@ export const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
 };
 
 const styles = StyleSheet.create({
+  actionButton: {
+    alignItems: 'center',
+    backgroundColor: colors.primary,
+    borderRadius: 8,
+    flex: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  buttonText: {
+    color: colors.white,
+    fontSize: 12,
+    fontWeight: '600',
+  },
   container: {
     alignItems: 'center',
     marginVertical: 16,
+  },
+  deleteButton: {
+    alignItems: 'center',
+    backgroundColor: colors.error,
+    borderRadius: 20,
+    bottom: 0,
+    height: 40,
+    justifyContent: 'center',
+    position: 'absolute',
+    right: 0,
+    width: 40,
+  },
+  deleteButtonText: {
+    color: colors.white,
+    fontSize: 20,
+    fontWeight: 'bold',
   },
   loadingContainer: {
     alignItems: 'center',
@@ -196,59 +230,26 @@ const styles = StyleSheet.create({
     paddingVertical: 32,
   },
   loadingText: {
-    marginTop: 12,
+    color: colors.mediumGray,
     fontSize: 14,
-    color: '#666',
-  },
-  previewContainer: {
-    position: 'relative',
-    marginBottom: 16,
-  },
-  previewImage: {
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    backgroundColor: '#E5E5EA',
-    justifyContent: 'center',
-    alignItems: 'center',
+    marginTop: 12,
   },
   placeholderImage: {
-    backgroundColor: '#F0F0F0',
+    backgroundColor: colors.backgroundGray,
   },
   placeholderText: {
     fontSize: 48,
   },
-  deleteButton: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#FF3B30',
+  previewContainer: {
+    marginBottom: 16,
+    position: 'relative',
+  },
+  previewImage: {
+    alignItems: 'center',
+    backgroundColor: colors.borderGray,
+    borderRadius: 75,
+    height: 150,
     justifyContent: 'center',
-    alignItems: 'center',
-  },
-  deleteButtonText: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  actionButton: {
-    flex: 1,
-    backgroundColor: '#007AFF',
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '600',
+    width: 150,
   },
 });

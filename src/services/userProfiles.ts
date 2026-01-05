@@ -16,12 +16,14 @@ const getIdToken = async (): Promise<string> => {
  */
 export const createUserProfile = async (
   uid: string,
-  displayName: string | { email: string; displayName: string; photoUrl: null; createdAt: Date },
+  displayName:
+    | string
+    | { email: string; displayName: string; photoUrl: null; createdAt: Date },
   email?: string
 ): Promise<UserProfile> => {
   try {
     const idToken = await getIdToken();
-    
+
     // Handle both old and new call signatures
     let profileDisplayName = '';
     let profileEmail = '';
@@ -57,9 +59,12 @@ export const createUserProfile = async (
             isPublic: { booleanValue: true },
             followers: { arrayValue: { values: [] } },
             following: { arrayValue: { values: [] } },
-            ...(() => profilePhotoUrl ? {
-              profilePictureUrl: { stringValue: profilePhotoUrl },
-            } : {})(),
+            ...(() =>
+              profilePhotoUrl
+                ? {
+                    profilePictureUrl: { stringValue: profilePhotoUrl },
+                  }
+                : {})(),
           },
         }),
       }
@@ -566,7 +571,9 @@ export const getFollowersList = async (
     if (Array.isArray(data)) {
       for (const doc of data) {
         if (doc.document?.fields?.follower?.stringValue) {
-          const profile = await getUserProfile(doc.document.fields.follower.stringValue);
+          const profile = await getUserProfile(
+            doc.document.fields.follower.stringValue
+          );
           if (profile) {
             profiles.push(profile);
           }
@@ -621,7 +628,9 @@ export const getFollowingList = async (
     if (Array.isArray(data)) {
       for (const doc of data) {
         if (doc.document?.fields?.following?.stringValue) {
-          const profile = await getUserProfile(doc.document.fields.following.stringValue);
+          const profile = await getUserProfile(
+            doc.document.fields.following.stringValue
+          );
           if (profile) {
             profiles.push(profile);
           }

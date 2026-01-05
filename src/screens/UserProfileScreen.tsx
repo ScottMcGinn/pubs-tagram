@@ -297,48 +297,105 @@ export const UserProfileScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+  actionContainer: {
+    flexDirection: 'row',
+    gap: 12,
     padding: 16,
-  },
-  emptyText: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 16,
   },
   backButton: {
     backgroundColor: '#007AFF',
     borderRadius: 8,
-    paddingVertical: 10,
     paddingHorizontal: 20,
+    paddingVertical: 10,
   },
   backButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
   },
-  actionContainer: {
-    flexDirection: 'row',
+  blockButton: {
+    alignItems: 'center',
+    backgroundColor: '#F0F0F0',
+    borderRadius: 8,
+    flex: 0.4,
+    paddingVertical: 12,
+  },
+  blockButtonText: {
+    color: '#262626',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  container: {
+    backgroundColor: '#FFFFFF',
+    flex: 1,
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
     padding: 16,
+  },
+  emptyMessage: {
+    color: '#8E8E8E',
+    fontSize: 14,
+    paddingVertical: 40,
+    textAlign: 'center',
+  },
+  emptyText: {
+    color: '#666',
+    fontSize: 16,
+    marginBottom: 16,
+  },
+  feedCard: {
+    borderColor: '#DBDBDB',
+    borderRadius: 8,
+    borderWidth: 1,
+    marginBottom: 12,
+    marginHorizontal: 12,
+    overflow: 'hidden',
+  },
+  feedCardContent: {
+    flexDirection: 'row',
     gap: 12,
   },
-  followButton: {
+  feedCardHad: {
+    color: '#262626',
+    fontSize: 13,
+    marginBottom: 6,
+  },
+  feedCardImage: {
+    backgroundColor: '#FAFAFA',
+    height: 100,
+    width: 100,
+  },
+  feedCardInfo: {
     flex: 1,
+    justifyContent: 'space-between',
+    padding: 12,
+  },
+  feedCardLocation: {
+    color: '#8E8E8E',
+    fontSize: 13,
+    marginBottom: 6,
+  },
+  feedCardRatings: {
+    gap: 4,
+  },
+  feedCardTitle: {
+    color: '#262626',
+    fontSize: 15,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  feedContainer: {
+    padding: 0,
+  },
+  followButton: {
+    alignItems: 'center',
     backgroundColor: '#007AFF',
     borderRadius: 8,
+    flex: 1,
     paddingVertical: 12,
-    alignItems: 'center',
   },
   followButtonText: {
     color: '#fff',
@@ -351,128 +408,71 @@ const styles = StyleSheet.create({
   followingButtonText: {
     color: '#262626',
   },
-  blockButton: {
-    flex: 0.4,
-    backgroundColor: '#F0F0F0',
-    borderRadius: 8,
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
-  blockButtonText: {
-    color: '#262626',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  tabContainer: {
-    flexDirection: 'row',
-    borderBottomWidth: 1,
-    borderBottomColor: '#DBDBDB',
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: 12,
-    alignItems: 'center',
-    borderBottomWidth: 3,
-    borderBottomColor: 'transparent',
-  },
-  tabActive: {
-    borderBottomColor: '#262626',
-  },
-  tabText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#8E8E8E',
-  },
-  tabTextActive: {
-    color: '#262626',
-  },
-  gridContainer: {
-    padding: 4,
-  },
-  feedContainer: {
-    padding: 0,
-  },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
   },
+  gridContainer: {
+    padding: 4,
+  },
+  gridImage: {
+    backgroundColor: '#FAFAFA',
+    height: '100%',
+    width: '100%',
+  },
   gridItem: {
-    width: '33.33%',
     aspectRatio: 1,
     padding: 2,
     position: 'relative',
-  },
-  gridImage: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: '#FAFAFA',
-  },
-  multiPhotoIndicator: {
-    position: 'absolute',
-    top: 6,
-    right: 6,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    borderRadius: 12,
-    width: 24,
-    height: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  multiPhotoIcon: {
-    fontSize: 12,
-  },
-  feedCard: {
-    marginHorizontal: 12,
-    marginBottom: 12,
-    borderRadius: 8,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: '#DBDBDB',
-  },
-  feedCardContent: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  feedCardImage: {
-    width: 100,
-    height: 100,
-    backgroundColor: '#FAFAFA',
-  },
-  feedCardInfo: {
-    flex: 1,
-    padding: 12,
-    justifyContent: 'space-between',
-  },
-  feedCardTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#262626',
-    marginBottom: 4,
-  },
-  feedCardLocation: {
-    fontSize: 13,
-    color: '#8E8E8E',
-    marginBottom: 6,
-  },
-  feedCardHad: {
-    fontSize: 13,
-    color: '#262626',
-    marginBottom: 6,
-  },
-  feedCardRatings: {
-    gap: 4,
-  },
-  rating: {
-    fontSize: 12,
-    color: '#8E8E8E',
+    width: '33.33%',
   },
   loader: {
     marginVertical: 40,
   },
-  emptyMessage: {
-    fontSize: 14,
+  loadingContainer: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+  },
+  multiPhotoIcon: {
+    fontSize: 12,
+  },
+  multiPhotoIndicator: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    borderRadius: 12,
+    height: 24,
+    justifyContent: 'center',
+    position: 'absolute',
+    right: 6,
+    top: 6,
+    width: 24,
+  },
+  rating: {
     color: '#8E8E8E',
-    textAlign: 'center',
-    paddingVertical: 40,
+    fontSize: 12,
+  },
+  tab: {
+    alignItems: 'center',
+    borderBottomColor: 'transparent',
+    borderBottomWidth: 3,
+    flex: 1,
+    paddingVertical: 12,
+  },
+  tabActive: {
+    borderBottomColor: '#262626',
+  },
+  tabContainer: {
+    borderBottomColor: '#DBDBDB',
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+  },
+  tabText: {
+    color: '#8E8E8E',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  tabTextActive: {
+    color: '#262626',
   },
 });
