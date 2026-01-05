@@ -23,7 +23,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.pubstagram.app",
-      "versionCode": 1,
+      "versionCode": 2,
       "permissions": [
         "android.permission.INTERNET",
         "android.permission.CAMERA",
@@ -53,9 +53,7 @@
       "buildVariant": "production",
       "versionStrategy": "manual"
     },
-    "runtimeVersion": {
-      "policy": "sdkVersion"
-    },
+    "runtimeVersion": "1.0.0",
     "developmentClient": {
       "ios": {
         "supportsTablet": true,
@@ -65,6 +63,7 @@
       "android": {
         "package": "com.pubstagram.app.dev",
         "versionCode": 1
-      }    }
+      }
+    }
   }
 }
